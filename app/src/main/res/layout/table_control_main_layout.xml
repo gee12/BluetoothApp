@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/table_control_main_layout">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/table_control_top_panel_layout"
+        android:layout_weight="1" >
+
+        <Button
+            style="@style/AppTheme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/str_add_value"
+            android:id="@+id/table_control_button_add_id"
+            android:layout_gravity="center_horizontal"
+            android:singleLine="true"
+            android:layout_margin="5dp"
+            android:drawableLeft="@android:drawable/ic_input_add"
+            android:gravity="center_vertical|left" />
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/table_control_list_panel_layout"
+        android:layout_weight="100" >
+
+        <ListView
+            style="@style/AppTheme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/table_control_list_id"
+            android:choiceMode="singleChoice"
+            android:focusable="false"
+            android:fastScrollEnabled="false"
+            android:smoothScrollbar="false"
+            android:footerDividersEnabled="true"
+            android:headerDividersEnabled="true"
+            android:visibility="visible"
+            android:layout_gravity="top" />
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/table_control_bottom_panel_layout"
+        android:layout_weight="1" >
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/str_select"
+            android:id="@+id/table_control_button_select_id"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="5dp"
+            android:drawableLeft="@drawable/ic_apply"
+            android:gravity="center_vertical|left" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/str_cancel"
+            android:id="@+id/table_control_button_cancel_id"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="5dp"
+            android:drawableLeft="@drawable/ic_cross"
+            android:gravity="center_vertical|left"/>
+    </LinearLayout>
+</LinearLayout>

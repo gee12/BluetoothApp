@@ -1,0 +1,97 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:descendantFocusability="beforeDescendants"
+            android:focusableInTouchMode="true">
+
+            <Button
+                android:id="@+id/discovery_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:onClick="discoverDevices"
+                android:text="@string/str_discover_devices" />
+
+            <!--<TextView-->
+                <!--android:layout_width="fill_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="@string/title_tap_to_connect" />-->
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                <!--style="@android:style/Widget.ProgressBar.Large"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:layout_marginRight="10dp"-->
+                <!--android:layout_marginTop="10dp"-->
+
+                <ProgressBar
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/progressBarList"
+                    android:layout_centerInParent="true"
+                    android:visibility="invisible"/>
+
+                <ListView
+                    android:id="@android:id/list"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@android:id/empty"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_no_devices"
+                    android:layout_centerInParent="true" />
+            </RelativeLayout>
+
+            <!--<Button-->
+                <!--android:layout_width="fill_parent"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:onClick="sendTestMessage"-->
+                <!--android:text="@string/str_send_test_message" />-->
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/str_prompt_enter_message" />
+
+            <EditText
+                android:id="@+id/message_text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/str_message_for_device"
+                android:nestedScrollingEnabled="false"
+                android:lines="2"
+                android:gravity="top|left" />
+
+            <Button
+                android:layout_width="fill_parent"
+                android:onClick="sendMessage"
+                android:text="@string/str_send_message"
+                android:layout_gravity="bottom"
+                android:id="@+id/button_send_message"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/data_text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <ProgressBar
+    android:layout_width="100dp"
+    android:layout_height="100dp"
+    android:id="@+id/progressBarMain"
+    android:layout_centerInParent="true"
+    android:visibility="invisible"/>
+
+</RelativeLayout>

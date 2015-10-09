@@ -1,0 +1,43 @@
+package com.icon.utils;
+
+import android.bluetooth.BluetoothDevice;
+import android.text.format.Time;
+
+/**
+ * Created by Ivan on 02.10.2015.
+ */
+public class Utils {
+    public static Time timeNow() {
+        Time time = new Time();
+        time.setToNow();
+        return time;
+    }
+
+    public static byte[] toBytes(int... ints) {
+        byte[] result = new byte[ints.length];
+        for (int i = 0; i < ints.length; i++) {
+            result[i] = (byte) ints[i];
+        }
+        return result;
+    }
+
+    public static byte[] toBytes(char... chars) {
+        byte[] result = new byte[chars.length];
+        for (int i = 0; i < chars.length; i++) {
+            result[i] = (byte) chars[i];
+        }
+        return result;
+    }
+
+    public static String bytesToHex(byte[] a) {
+        StringBuilder sb = new StringBuilder(a.length * 2);
+        for(byte b: a)
+            sb.append(String.format("%02x", b & 0xff));
+        return sb.toString();
+    }
+
+    public static String getDeviceInfo(BluetoothDevice device) {
+        return String.format("[%s, %s]", device.getName(), device.getAddress());
+    }
+
+}

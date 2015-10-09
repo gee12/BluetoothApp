@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="col_device_online" >#005500</color>
+    <color name="col_device_offline" >#000055</color>
+    <color name="col_device_bond" >#773300</color>
+</resources>

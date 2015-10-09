@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/template_list_item_radio"
+    android:baselineAligned="false"
+    android:focusable="false"
+    android:focusableInTouchMode="false">
+
+    <!--<FrameLayout-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:id="@+id/radio_button_frame"-->
+        <!--android:layout_weight="100"-->
+        <!--android:focusable="false"-->
+        <!--android:focusableInTouchMode="false">-->
+
+        <!--<RadioButton-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:id="@+id/template_list_item_radio_id"-->
+            <!--android:layout_gravity="center_vertical"-->
+            <!--android:layout_marginLeft="5dp"-->
+            <!--android:hint="@string/str_no_value"-->
+            <!--android:focusable="false"-->
+            <!--android:focusableInTouchMode="false" />-->
+    <!--</FrameLayout>-->
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="100"
+        android:layout_margin="10dp"
+        android:layout_gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/textView_device_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:text="@string/str_unknown_device"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textView_mac_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/str_unknown_mac_address" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttons_panel"
+        android:layout_margin="5dp"
+        android:layout_weight="1"
+        android:focusable="false"
+        android:focusableInTouchMode="false">
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/template_list_item_edit"
+            android:src="@drawable/ic_edit"
+            android:layout_gravity="center_vertical"
+            android:focusable="false"
+            android:focusableInTouchMode="false" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/template_list_item_delete"
+            android:src="@drawable/ic_cross"
+            android:layout_gravity="center_vertical"
+            android:cropToPadding="false"
+            android:adjustViewBounds="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/template_list_item_progr"
+            android:src="@drawable/ic_system"
+            android:layout_gravity="center_vertical"
+            android:cropToPadding="false"
+            android:adjustViewBounds="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false" />
+    </LinearLayout>
+
+</LinearLayout>
