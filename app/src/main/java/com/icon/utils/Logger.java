@@ -1,12 +1,12 @@
 package com.icon.utils;
 
 import android.os.Environment;
-import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,12 +15,19 @@ import java.io.InputStreamReader;
  * Created by Ivan on 30.09.2015.
  */
 public class Logger {
+    public static final int VERBOSE = Log.VERBOSE;
+    public static final int DEBUG = Log.DEBUG;
+    public static final int INFO = Log.INFO;
+    public static final int WARN = Log.WARN;
+    public static final int ERROR = Log.ERROR;
+    public static final int ASSERT = Log.ASSERT;
+    public static final int UNCAUGHT = Log.ASSERT + 1;
 
     public static final String DEF_TAG = "agnks";
     public static final String DEF_LOG_DIR = "/";
     public static final String DEF_LOG_FILE_NAME = DEF_TAG + "_log.log";
-    public static final long LOG_FILE_MAX_SIZE = 32 * 1024;
-    public static final int LOG_FILE_MAX_END_LINES = 20;
+    public static final int DEF_LOG_FILE_MAX_SIZE_KBYTES = 32;
+    public static final int DEF_LOG_FILE_MAX_END_LINES = 20;
 
     public static String Tag = DEF_TAG;
     public static String LogDir = DEF_LOG_DIR;
@@ -29,6 +36,10 @@ public class Logger {
     public static File LogFile = null;
     public static boolean isInit;
     public static int Level = -1;
+
+    public static boolean IsNeedLog = true;
+    public static int LogFileMaxSize = DEF_LOG_FILE_MAX_SIZE_KBYTES;
+    public static int LogFileMaxEndLines = DEF_LOG_FILE_MAX_END_LINES;
 
     public static void initCacheDir(String cacheDir) {
         init(DEF_LOG_DIR, cacheDir, DEF_LOG_FILE_NAME);
@@ -76,17 +87,26 @@ public class Logger {
         return (Level & type) != 0;
     }
 
+    public static boolean isNeedLog() {
+//        String key_is_need_log = Global.globalContext.getString(R.string.pref_key_is_need_log);
+//        String value = SettingsActivity.getPref(key_is_need_log);
+//        return Boolean.parseBoolean(value);
+
+//        return (BuildConfig.DEBUG);
+        return IsNeedLog;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static void add(String message, int type, boolean isNeedSystemLog) {
-        if (isLog() && isLevelSuit(type)) {
+        if (isNeedLog() && isLevelSuit(type)) {
             String strType = systemlog(message, type, isNeedSystemLog);
             write(strType, message);
         }
     }
 
     public static void add(Exception ex, int type, boolean isNeedSystemLog) {
-        if (isLog() && isLevelSuit(type)) {
+        if (isNeedLog() && isLevelSuit(type)) {
             String message = ex.getMessage();
             String strType = systemlog(message, ex, type, isNeedSystemLog);
             write(strType, message);
@@ -94,7 +114,7 @@ public class Logger {
     }
 
     public static void add(String message, Exception ex, int type, boolean isNeedSystemLog) {
-        if (isLog() && isLevelSuit(type)) {
+        if (isNeedLog() && isLevelSuit(type)) {
             String allMessage = message + "\n" + ex.getMessage();
             String strType = systemlog(allMessage, ex, type, isNeedSystemLog);
             write(strType, allMessage);
@@ -102,14 +122,14 @@ public class Logger {
     }
 
     public static void add(String message, int type) {
-        if (isLog() && isLevelSuit(type)) {
+        if (isNeedLog() && isLevelSuit(type)) {
             String strType = systemlog(message, type, true);
             write(strType, message);
         }
     }
 
     public static void add(Exception ex, int type) {
-        if (isLog() && isLevelSuit(type)) {
+        if (isNeedLog() && isLevelSuit(type)) {
             String message = ex.getMessage();
             String strType = systemlog(message, ex, type, true);
             write(strType, message);
@@ -117,51 +137,65 @@ public class Logger {
     }
 
     public static void add(String message, Exception ex, int type) {
-        if (isLog() && isLevelSuit(type)) {
+        if (isNeedLog() && isLevelSuit(type)) {
             String allMessage = message + "\n" + ex.getMessage();
             String strType = systemlog(allMessage, ex, type, true);
             write(strType, allMessage);
         }
     }
 
+    public static void add(Thread thread, Throwable throwable) {
+        if (isNeedLog() && isLevelSuit(UNCAUGHT)) {
+            String allMessage = thread.getName() + ": " + throwable.getMessage();
+            Log.e(Tag, allMessage, throwable);
+            write("UNCAUGHT", allMessage);
+        }
+    }
+
     public static String systemlog(String message, int type, boolean isNeedWriteLog) {
         switch(type) {
-            case Log.ERROR:
-                if (isNeedWriteLog) Log.e(Tag, message);
-                return "ERROR";
-            case Log.DEBUG:
+            case DEBUG:
                 if (isNeedWriteLog) Log.d(Tag, message);
                 return "DEBUG";
-            case Log.VERBOSE:
+            case VERBOSE:
                 if (isNeedWriteLog) Log.v(Tag, message);
                 return "VERBOSE";
-            case Log.INFO:
+            case INFO:
                 if (isNeedWriteLog) Log.i(Tag, message);
                 return "INFO";
-            case Log.WARN:
+            case WARN:
                 if (isNeedWriteLog) Log.w(Tag, message);
                 return "WARN";
+            case ERROR:
+                if (isNeedWriteLog) Log.e(Tag, message);
+                return "ERROR";
+            case UNCAUGHT:
+                if (isNeedWriteLog) Log.e(Tag, message);
+                return "UNCAUGHT";
         }
         return "NONE";
     }
 
     public static String systemlog(String message, Exception ex, int type, boolean isNeedWriteLog) {
         switch(type) {
-            case Log.ERROR:
-                if (isNeedWriteLog) Log.e(Tag, message, ex);
-                return "ERROR";
-            case Log.DEBUG:
+            case DEBUG:
                 if (isNeedWriteLog) Log.d(Tag, message, ex);
                 return "DEBUG";
-            case Log.VERBOSE:
+            case VERBOSE:
                 if (isNeedWriteLog) Log.v(Tag, message, ex);
                 return "VERBOSE";
-            case Log.INFO:
+            case INFO:
                 if (isNeedWriteLog) Log.i(Tag, message, ex);
                 return "INFO";
-            case Log.WARN:
+            case WARN:
                 if (isNeedWriteLog) Log.w(Tag, message, ex);
                 return "WARN";
+            case ERROR:
+                if (isNeedWriteLog) Log.e(Tag, message);
+                return "ERROR";
+            case UNCAUGHT:
+                if (isNeedWriteLog) Log.e(Tag, message);
+                return "UNCAUGHT";
         }
         return "NONE";
     }
@@ -172,12 +206,6 @@ public class Logger {
 
     public static void systemlog(Exception ex) {
         Log.e(Tag, ex.getLocalizedMessage(), ex);
-    }
-
-    public static boolean isLog()
-    {
-//        return (BuildConfig.DEBUG);
-        return true;
     }
 
     /*
@@ -197,11 +225,11 @@ public class Logger {
                 LogFile.createNewFile();
             }
             //
-            int lineNum = cutIfMore(LogFile, LOG_FILE_MAX_SIZE, LOG_FILE_MAX_END_LINES);
+            int lineNum = cutIfMore(LogFile, LogFileMaxSize*1024, LogFileMaxEndLines);
 
             FileWriter f = new FileWriter(LogFile, true);
             if (lineNum > 0) {
-                f.write(formatLogMessage("Log file was cut, because has been exceeded size of [" + LOG_FILE_MAX_SIZE +"] bytes. Saved last [" + lineNum + "] lines"));
+                f.write(formatLogMessage("Log file was cut, because has been exceeded size of [" + LogFileMaxSize +"] kBytes. Saved last [" + lineNum + "] lines"));
             }
             f.write(formatLogMessage(message));
             f.flush();
@@ -223,4 +251,28 @@ public class Logger {
         return 0;
     }
 
+    /*
+    *
+    */
+    public static String readLogs() {
+        if (!LogFile.exists()) {
+            return "Лог-файл отсутствует..";
+        }
+        FileInputStream fis = null;
+        StringBuffer sb = null;
+        try {
+            fis = new FileInputStream(LogFile);
+            BufferedReader in = new BufferedReader(new InputStreamReader(fis));
+            sb = new StringBuffer();
+            String line;
+            while((line = in.readLine()) != null){
+                sb.append(line);
+                sb.append("\n");
+            }
+            return sb.toString();
+        } catch (Exception ex) {
+            Log.e(Tag, "Error with log-file reading:\n" + ex.getMessage(), ex);
+        }
+        return "";
+    }
 }

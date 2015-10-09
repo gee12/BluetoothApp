@@ -4,10 +4,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 
+import com.icon.utils.CustomExceptionHandler;
+import com.icon.utils.Global;
 import com.icon.utils.Logger;
 
 import com.icon.bluetooth.TestActivity;
@@ -16,13 +20,36 @@ public class BaseActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // set custom uncaught exception handler
+        Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_base);
 
+        if (savedInstanceState == null) {
+            Global.globalContext = this;
+        }
+
         if (!Logger.isInit) {
             Logger.initCacheDir(getBaseContext().getCacheDir().getAbsolutePath());
-            Logger.setLevel(Log.ERROR | Log.DEBUG | Log.INFO);
+            Logger.setLevel(Logger.ERROR | Logger.DEBUG | Logger.INFO | Logger.UNCAUGHT);
+
+            Logger.IsNeedLog = SettingsActivity.getPref(getString(R.string.pref_key_is_need_log), true);
+            Logger.LogFileMaxSize = Integer.parseInt(SettingsActivity.getPref(getString(R.string.pref_key_log_max_size)));
+            Logger.LogFileMaxEndLines = Integer.parseInt(SettingsActivity.getPref(getString(R.string.pref_key_log_last_lines)));
+
+            Logger.add("Запуск: ", Logger.INFO);
         }
+
+
+        Button button = (Button)findViewById(R.id.button_in_base);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final TextView textView = (TextView)findViewById(R.id.textView1);
+                textView.setText(String.valueOf(Logger.LogFileMaxSize));
+            }
+        });
     }
 
     @Override

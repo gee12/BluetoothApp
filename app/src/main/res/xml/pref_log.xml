@@ -1,0 +1,37 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/pref_header_log">
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="@string/pref_key_is_need_log"
+            android:title="Вести лог" />
+
+        <EditTextPreference
+            android:defaultValue="32"
+            android:dependency="@string/pref_key_is_need_log"
+            android:dialogTitle="Максимальный размер лог-файла"
+            android:inputType="number"
+            android:key="@string/pref_key_log_max_size"
+            android:maxLength="5"
+            android:summary="(Кб)"
+            android:title="Максимальный размер лог-файла" />
+
+        <EditTextPreference
+            android:defaultValue="30"
+            android:dependency="@string/pref_key_is_need_log"
+            android:dialogTitle="Количество строк"
+            android:inputType="number"
+            android:key="@string/pref_key_log_last_lines"
+            android:maxLength="5"
+            android:summary="Количество копируемых строк в новый лог-файл, если размер старого лог-файла превышает максимальный"
+            android:title="Количество строк" />
+
+        <PreferenceScreen
+            android:title="Показать логи">
+            <intent android:action="com.icon.agnks.LogActivity" />
+        </PreferenceScreen>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

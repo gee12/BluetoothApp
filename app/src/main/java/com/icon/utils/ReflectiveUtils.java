@@ -11,27 +11,23 @@ public class ReflectiveUtils {
     /*
     *
     */
-    public static String getLocation() {
+    public static String getLocation( Thread thread) {
         final String className = Log.class.getName();
-        final StackTraceElement[] traces = Thread.currentThread().getStackTrace();
+        final StackTraceElement[] traces = thread.getStackTrace();
         boolean found = false;
 
-        for (int i = 0; i < traces.length; i++) {
-            StackTraceElement trace = traces[i];
-
+        for (StackTraceElement trace : traces) {
             try {
                 if (found) {
                     if (!trace.getClassName().startsWith(className)) {
                         Class<?> clazz = Class.forName(trace.getClassName());
                         return "[" + getClassName(clazz) + ":" + trace.getMethodName() + ":" + trace.getLineNumber() + "]: ";
                     }
-                }
-                else if (trace.getClassName().startsWith(className)) {
+                } else if (trace.getClassName().startsWith(className)) {
                     found = true;
                     continue;
                 }
-            }
-            catch (ClassNotFoundException e) {
+            } catch (ClassNotFoundException e) {
             }
         }
 
@@ -46,10 +42,8 @@ public class ReflectiveUtils {
             if (!TextUtils.isEmpty(clazz.getSimpleName())) {
                 return clazz.getSimpleName();
             }
-
             return getClassName(clazz.getEnclosingClass());
         }
-
         return "";
     }
 }

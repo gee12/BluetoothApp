@@ -1,5 +1,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <PreferenceCategory
+        android:title="Notifications">
     <!-- A 'parent' preference, which enables/disables child preferences (below)
          when checked/unchecked. -->
     <CheckBoxPreference
@@ -24,4 +26,5 @@
         android:title="@string/pref_title_vibrate"
         android:defaultValue="true" />
 
+    </PreferenceCategory>
 </PreferenceScreen>

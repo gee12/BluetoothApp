@@ -54,9 +54,11 @@ public class EditDeviceActivity extends Activity {
     private void close(int result) {
         Intent returnIntent = new Intent();
         if (result == RESULT_OK) {
-            Bundle bundle = new Bundle();
-            bundle.putSerializable(Device.KEY_DEVICE_OBJECT, device);
-            returnIntent.putExtras(bundle);
+//            Bundle bundle = new Bundle();
+//            bundle.putSerializable(Device.KEY_DEVICE_OBJECT, device);
+//            returnIntent.putExtras(bundle);
+
+            returnIntent.putExtra(Device.KEY_DEVICE_CUSTOM_NAME, device.CustomName);
         }
         setResult(result, returnIntent);
         finish();

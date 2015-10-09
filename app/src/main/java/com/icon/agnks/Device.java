@@ -16,15 +16,15 @@ public class Device implements Serializable, Comparable<Device> {
     public static final String KEY_DEVICE_ID = "DeviceIdKey";
     public static final String KEY_DEVICE_OBJECT = "DeviceObject";
 //    public static final String KEY_DEVICE_NAME = "DeviceName";
-//    public static final String KEY_CUSTOM_NAME = "CustomName";
-//    public static final String KEY_MAC_ADDRESS = "MacAddress";
+    public static final String KEY_DEVICE_CUSTOM_NAME = "CustomName";
+//    public static final String KEY_DEVICE_MAC_ADDRESS = "MacAddress";
 
     public static String UNKNOWN_DEVICE = "Неизвестное устройство";
     public static String DEF_MAC_ADDRESS = "0000";
 
-    public static final int STATE_OFFLINE = 0;
-    public static final int STATE_BOND = 1;
-    public static final int STATE_ONLINE = 2;
+    public static final int STATE_OFFLINE = 1;
+//    public static final int STATE_BOND = 2;
+    public static final int STATE_ONLINE = 3;
 
 //    public BluetoothDevice BTDevice;
     public int Id;
@@ -73,10 +73,10 @@ public class Device implements Serializable, Comparable<Device> {
         if (!(other instanceof Device))return false;
         Device otherDevice = (Device)other;
 
-//        return (MacAddress.equalsIgnoreCase(otherDevice.MacAddress));
-        return new EqualsBuilder().
-                append(MacAddress, otherDevice.MacAddress).
-                isEquals();
+        return (MacAddress.equalsIgnoreCase(otherDevice.MacAddress));
+//        return new EqualsBuilder().
+//                append(MacAddress, otherDevice.MacAddress).
+//                isEquals();
     }
 
     @Override

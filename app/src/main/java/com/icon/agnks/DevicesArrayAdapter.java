@@ -43,9 +43,14 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
         this.listView = listView;
         this.dbDevices = dbDevices;
         this.devicesListener = devicesListener;
-
         this.list = new ArrayList<>();
-        this.list.addAll(dbDevices);
+        reinit(dbDevices, false);
+    }
+
+    public void reinit(List<Device> devices, boolean isNeedNotify) {
+        this.list.clear();
+        this.list.addAll(devices);
+        if (isNeedNotify) notifyDataSetChanged();
     }
 
     /*
@@ -81,8 +86,8 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
     }
 
     public boolean contains(Device device) {
-        for(Device item : list) {
-            if(item.equals(device))
+        for (Device item : list) {
+            if (item.MacAddress.equalsIgnoreCase(device.MacAddress))//item.equals(device))
                 return true;
         }
         return false;
@@ -163,9 +168,9 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
             case Device.STATE_ONLINE:
                 resColor = R.color.col_device_online;
                 break;
-            case Device.STATE_BOND:
-                resColor = R.color.col_device_bond;
-                break;
+//            case Device.STATE_BOND:
+//                resColor = R.color.col_device_bond;
+//                break;
             default:
                 resColor = R.color.col_device_offline;
                 break;
@@ -192,8 +197,10 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
     *
     */
     public void startDiscovery() {
-        list.clear();
-        list.addAll(dbDevices);
+        for (Device device : dbDevices) {
+            device.State = Device.STATE_OFFLINE;
+        }
+        reinit(dbDevices, true);
     }
 
     /*

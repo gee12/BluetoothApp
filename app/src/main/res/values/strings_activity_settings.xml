@@ -58,4 +58,12 @@
     <string name="pref_ringtone_silent">Silent</string>
 
     <string name="pref_title_vibrate">Vibrate</string>
+
+
+    <!-- Example settings for Logs -->
+    <string name="pref_header_log">Логи</string>
+
+    <!-- Example settings for Bluetooth -->
+    <string name="pref_header_bluetooth">Bluetooth</string>
+
 </resources>

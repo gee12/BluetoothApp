@@ -29,6 +29,7 @@
     <string name="action_edit_device">Редактирование устройства</string>
     <string name="action_settings">Настройки</string>
     <string name="action_about">О программе</string>
+    <string name="action_logs">Логи</string>
     <string name="action_test">Bluetooth тест</string>
 
     <!-- Other -->
@@ -52,5 +53,9 @@
     <string name="str_mac_address">Mac-адресс:</string>
     <string name="str_device_custom_name">Пользовательское имя устройства:</string>
     <string name="str_connection_is_established">Соединение устанавливается..</string>
+    <string name="pref_key_number">pref_number</string>
+    <string name="pref_key_log_last_lines">pref_log_last_lines</string>
+    <string name="pref_key_is_need_log">pref_is_need_log</string>
+    <string name="pref_key_log_max_size">pref_log_max_size</string>
 
 </resources>

@@ -33,9 +33,10 @@ public class DevicesManageActivity extends BaseListActivity {
 
     private DevicesArrayAdapter listAdapter;
     private Button buttonDiscovery;
-    private ProgressBar progressBarList;
+    private ProgressBar progressBar;
     private boolean isDiscoveryAtWork;
     private DBHelper dbHelper;
+    private Device currentDevice;
 
     /*
     *
@@ -65,16 +66,16 @@ public class DevicesManageActivity extends BaseListActivity {
         setContentView(R.layout.activity_devices_manage);
 
         buttonDiscovery = (Button) findViewById(R.id.discovery_button);
-        progressBarList = (ProgressBar) findViewById(R.id.progressBarList);
+        progressBar = (ProgressBar) findViewById(R.id.progressBarList);
 
-        dbHelper = new DBHelper(this);
-        List<Device> dbDevices = dbHelper.getAllToList();
+        if (savedInstanceState != null) return;
 
         //
         DevicesArrayAdapter.DevicesListener devicesListener = new DevicesArrayAdapter.DevicesListener() {
             @Override
             public void onAdd(Device device) {
                 // show add activity
+                DevicesManageActivity.this.currentDevice = device;
                 Intent intent = new Intent(DevicesManageActivity.this, EditDeviceActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(Device.KEY_DEVICE_OBJECT, device);
@@ -85,6 +86,7 @@ public class DevicesManageActivity extends BaseListActivity {
             @Override
             public void onEdit(Device device) {
                 // show edit activity
+                DevicesManageActivity.this.currentDevice = device;
                 Intent intent = new Intent(DevicesManageActivity.this, EditDeviceActivity.class);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(Device.KEY_DEVICE_OBJECT, device);
@@ -108,6 +110,10 @@ public class DevicesManageActivity extends BaseListActivity {
             }
         };
 
+        //
+        dbHelper = new DBHelper(this);
+        List<Device> dbDevices = dbHelper.getAllToList();
+        //
         try {
             bluetoothAdapter = BluetoothUtils.getAdapter(this);
             listAdapter = new DevicesArrayAdapter(this, getListView(), dbDevices, devicesListener);
@@ -174,10 +180,10 @@ public class DevicesManageActivity extends BaseListActivity {
         if (isAtWork) {
             buttonDiscovery.setText(getString(R.string.str_stop_discover_devices));
             listAdapter.startDiscovery();
-            progressBarList.setVisibility(ProgressBar.VISIBLE);
+            progressBar.setVisibility(ProgressBar.VISIBLE);
         } else {
             buttonDiscovery.setText(getString(R.string.str_discover_devices));
-            progressBarList.setVisibility(ProgressBar.INVISIBLE);
+            progressBar.setVisibility(ProgressBar.INVISIBLE);
             MessageBox.shoter(getBaseContext(), "Поиск закончен. Выберите устройство для соединения");
 
             unregisterReceivers();
@@ -198,12 +204,16 @@ public class DevicesManageActivity extends BaseListActivity {
             }
         } else if (requestCode == REQUEST_ADD_DEVICE) {
             if (resultCode == RESULT_OK){
-                Device added = (Device) data.getSerializableExtra(Device.KEY_DEVICE_OBJECT);
+//                Device added = (Device) data.getSerializableExtra(Device.KEY_DEVICE_OBJECT);
+                Device added = DevicesManageActivity.this.currentDevice;
+                added.CustomName = data.getStringExtra(Device.KEY_DEVICE_CUSTOM_NAME);
                 addDevice(added);
             }
         } else if (requestCode == REQUEST_EDIT_DEVICE) {
             if (resultCode == RESULT_OK){
-                Device updated = (Device) data.getSerializableExtra(Device.KEY_DEVICE_OBJECT);
+//                Device updated = (Device) data.getSerializableExtra(Device.KEY_DEVICE_OBJECT);
+                Device updated = DevicesManageActivity.this.currentDevice;
+                updated.CustomName = data.getStringExtra(Device.KEY_DEVICE_CUSTOM_NAME);
                 updateDevice(updated);
             }
         }

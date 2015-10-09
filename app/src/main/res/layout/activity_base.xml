@@ -6,8 +6,15 @@
     android:gravity="center">
 
     <TextView
+        android:id="@+id/textView1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/str_main_window" />
+    <Button
+        android:id="@+id/button_in_base"
+        android:layout_below="@id/textView1"
+        android:text="Показать"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </RelativeLayout>

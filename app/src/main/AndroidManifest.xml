@@ -39,10 +39,21 @@
         <activity
             android:name=".SettingsActivity"
             android:label="@string/action_settings" >
+            <intent-filter>
+                <category android:name="android.intent.category.PREFERENCE" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".AboutActivity"
             android:label="@string/action_about" >
+        </activity>
+        <activity
+            android:name=".LogActivity"
+            android:label="@string/action_logs" >
+            <intent-filter>
+                <action android:name="com.icon.agnks.LogActivity" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
     </application>
 
