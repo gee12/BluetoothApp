@@ -4,10 +4,14 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.preference.PreferenceScreen;
 
+import com.icon.utils.Access;
 import com.icon.utils.Global;
 import com.icon.utils.Logger;
 
@@ -52,6 +56,7 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         if (!isNewV11Prefs()) {
             addPreferencesFromResource(R.xml.pref_log);
             addPreferencesFromResource(R.xml.pref_bluetooth);
+            addPreferencesFromResource(R.xml.pref_access);
         }
 
         listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
@@ -59,6 +64,22 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
                         SettingsActivity.this.onSharedPreferenceChanged(prefs, key);
                     }
                 };
+
+        makeAccess();
+    }
+
+    private void makeAccess() {
+        if (!Access.isAdmin()) {
+            PreferenceScreen screen = getPreferenceScreen();
+            // log category
+            PreferenceCategory logPrefCat = (PreferenceCategory)findPreference(getString(R.string.pref_key_category_log));
+            screen.removePreference(logPrefCat);
+
+            // pass
+            Preference adminPassPref = findPreference(getString(R.string.pref_key_admin_pass));
+            PreferenceCategory accessPrefCat = (PreferenceCategory)findPreference(getString(R.string.pref_key_category_access));
+            accessPrefCat.removePreference(adminPassPref);
+        }
     }
 
     @Override
@@ -71,16 +92,25 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         }
     }
 
+    /*
+    *
+    */
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         String isNeedLogKey = getString(R.string.pref_key_is_need_log);
         String maxSizeKey = getString(R.string.pref_key_log_max_size);
         String lastLinesKey = getString(R.string.pref_key_is_need_log);
+        String userPassKey = getString(R.string.pref_key_user_pass);
+        String adminPassKey = getString(R.string.pref_key_admin_pass);
         if (key.equals(isNeedLogKey)) {
             Logger.IsNeedLog = sharedPreferences.getBoolean(isNeedLogKey, true);
         } else if (key.equals(maxSizeKey)) {
             Logger.LogFileMaxSize = Integer.parseInt(sharedPreferences.getString(maxSizeKey, String.valueOf(Logger.DEF_LOG_FILE_MAX_SIZE_KBYTES)));
         } else if (key.equals(lastLinesKey)) {
             Logger.LogFileMaxEndLines = sharedPreferences.getInt(lastLinesKey, Logger.DEF_LOG_FILE_MAX_END_LINES);
+        } else if (key.equals(userPassKey)) {
+            Access.UserPass = sharedPreferences.getString(userPassKey, Access.UserPass);
+        } else if (key.equals(adminPassKey)) {
+            Access.AdminPass = sharedPreferences.getString(adminPassKey, Access.AdminPass);
         }
     }
 
@@ -100,7 +130,7 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Global.globalContext);
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(key, value);
-        editor.commit();
+        editor.apply();
     }
 
     public static String getPref(String key) {
@@ -111,6 +141,11 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
     public static String getPref(String key, String defValue) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Global.globalContext);
         return preferences.getString(key, defValue);
+    }
+
+    public static int getPref(String key, int defValue) {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Global.globalContext);
+        return Integer.parseInt(preferences.getString(key, String.valueOf(defValue)));
     }
 
     public static boolean getPref(String key, boolean defValue) {

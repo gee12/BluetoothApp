@@ -25,7 +25,7 @@ public class EditDeviceActivity extends Activity {
         editMacAddress = (EditText)findViewById(R.id.edittext_mac_address);
         editCustomName = (EditText)findViewById(R.id.edittext_custom_name);
 
-        device = (Device)getIntent().getSerializableExtra(Device.KEY_DEVICE_OBJECT);
+        device = (Device)getIntent().getParcelableExtra(Device.KEY_DEVICE_OBJECT);
         if (device == null) {
             MessageBox.shoter(this, "Устройство не определено");
             close(RESULT_CANCELED);

@@ -25,7 +25,7 @@ public class Logger {
 
     public static final String DEF_TAG = "agnks";
     public static final String DEF_LOG_DIR = "/";
-    public static final String DEF_LOG_FILE_NAME = DEF_TAG + "_log.log";
+    public static final String DEF_LOG_FILE_NAME = DEF_TAG + ".log";
     public static final int DEF_LOG_FILE_MAX_SIZE_KBYTES = 32;
     public static final int DEF_LOG_FILE_MAX_END_LINES = 20;
 
@@ -229,13 +229,13 @@ public class Logger {
 
             FileWriter f = new FileWriter(LogFile, true);
             if (lineNum > 0) {
-                f.write(formatLogMessage("Log file was cut, because has been exceeded size of [" + LogFileMaxSize +"] kBytes. Saved last [" + lineNum + "] lines"));
+                f.write(formatLogMessage("Лог-файл был обрезан, т.к. его размер превысил [" + LogFileMaxSize +"] КБайт. Сохранены последние [" + lineNum + "] строки"));
             }
             f.write(formatLogMessage(message));
             f.flush();
             f.close();
         } catch (Exception ex) {
-            Log.e(Tag, "Error with log-file writing:\n" + ex.getMessage(), ex);
+            Log.e(Tag, "Ошибка при записи лог-файла:\n" + ex.getMessage(), ex);
         }
     }
 
@@ -271,8 +271,26 @@ public class Logger {
             }
             return sb.toString();
         } catch (Exception ex) {
-            Log.e(Tag, "Error with log-file reading:\n" + ex.getMessage(), ex);
+            Log.e(Tag, "Ошибка при чтении лог-файла:\n" + ex.getMessage(), ex);
         }
         return "";
+    }
+
+    /*
+    *
+    */
+    public static void clearLogs() {
+        if (!LogFile.exists()) {
+            return;
+        }
+        FileWriter f = null;
+        try {
+            f = new FileWriter(LogFile, false);
+            f.write("");
+            f.flush();
+            f.close();
+        } catch (IOException ex) {
+            Log.e(Tag, "Ошибка при очистке лог-файла:\n" + ex.getMessage(), ex);
+        }
     }
 }

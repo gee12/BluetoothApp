@@ -57,5 +57,10 @@
     <string name="pref_key_log_last_lines">pref_log_last_lines</string>
     <string name="pref_key_is_need_log">pref_is_need_log</string>
     <string name="pref_key_log_max_size">pref_log_max_size</string>
+    <string name="pref_key_clear_log">pref_clear_log</string>
+    <string name="pref_key_user_pass">pref_key_user_pass</string>
+    <string name="pref_key_admin_pass">pref_key_admin_pass</string>
+    <string name="pref_key_category_access">pref_key_category_access</string>
+    <string name="pref_key_category_log">pref_key_category_log</string>
 
 </resources>

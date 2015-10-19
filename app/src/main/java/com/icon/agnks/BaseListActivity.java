@@ -10,13 +10,11 @@ public class BaseListActivity extends ListActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_base);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_base, menu);
-        return true;
+        return BaseActivity.onCreateOptionsMenu(this, menu);
     }
 
     @Override

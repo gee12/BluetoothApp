@@ -2,6 +2,10 @@ package com.icon.agnks;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import com.icon.utils.Utils;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -11,7 +15,7 @@ import java.io.Serializable;
 /**
  * Created by Ivan on 29.09.2015.
  */
-public class Device implements Serializable, Comparable<Device> {
+public class Device implements /*Serializable,*/ Comparable<Device>, Parcelable {
 
     public static final String KEY_DEVICE_ID = "DeviceIdKey";
     public static final String KEY_DEVICE_OBJECT = "DeviceObject";
@@ -47,6 +51,15 @@ public class Device implements Serializable, Comparable<Device> {
     public Device(BluetoothDevice device, int state) {
         String name = device.getName();
         init(name, name, device.getAddress(), state);
+    }
+
+    public Device(Parcel parcel) {
+        this.Id = parcel.readInt();
+        this.CustomName = parcel.readString();
+        this.DeviceName = parcel.readString();
+        this.MacAddress = parcel.readString();
+        this.State = parcel.readInt();
+        this.IsSaved = parcel.readByte() != 0;
     }
 
     public Device(String name, String addr, int state) {
@@ -90,4 +103,31 @@ public class Device implements Serializable, Comparable<Device> {
     public int compareTo(Device another) {
         return (equals(another)) ? 0 : -1;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(Id);
+        dest.writeString(CustomName);
+        dest.writeString(DeviceName);
+        dest.writeString(MacAddress);
+        dest.writeInt(State);
+        dest.writeByte(Utils.toByte(IsSaved));
+    }
+
+    public static final Parcelable.Creator<Device> CREATOR = new Creator<Device>() {
+        @Override
+        public Device createFromParcel(Parcel source) {
+            return new Device(source);
+        }
+
+        @Override
+        public Device[] newArray(int size) {
+            return new Device[size];
+        }
+    };
 }

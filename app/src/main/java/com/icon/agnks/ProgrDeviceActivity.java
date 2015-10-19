@@ -121,7 +121,7 @@ public class ProgrDeviceActivity extends Activity {
             return;
         }
 
-        device = (Device)getIntent().getSerializableExtra(Device.KEY_DEVICE_OBJECT);
+        device = (Device)getIntent().getParcelableExtra(Device.KEY_DEVICE_OBJECT);
         if (device == null) {
             MessageBox.longer(this, "Устройство не определено");
             finish();

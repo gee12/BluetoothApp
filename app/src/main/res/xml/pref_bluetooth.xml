@@ -2,7 +2,7 @@
 
     <PreferenceCategory android:title="@string/pref_header_bluetooth">
 
-        <Preference android:title="Настройки Bluetooth">
+        <Preference android:title="Параметры Bluetooth">
             <intent android:action="android.settings.BLUETOOTH_SETTINGS" />
         </Preference>
 

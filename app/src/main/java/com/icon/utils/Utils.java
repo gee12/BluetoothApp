@@ -36,6 +36,10 @@ public class Utils {
         return sb.toString();
     }
 
+    public static byte toByte(boolean bool) {
+        return (byte)(bool ? 1 : 0);
+    }
+
     public static String getDeviceInfo(BluetoothDevice device) {
         return String.format("[%s, %s]", device.getName(), device.getAddress());
     }

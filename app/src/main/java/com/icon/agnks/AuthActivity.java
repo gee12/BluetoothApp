@@ -1,0 +1,105 @@
+package com.icon.agnks;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import com.icon.utils.Access;
+import com.icon.utils.CustomExceptionHandler;
+import com.icon.utils.Global;
+import com.icon.utils.Logger;
+import com.icon.utils.MessageBox;
+
+/**
+ * Created by Ivan on 19.10.2015.
+ */
+public class AuthActivity extends Activity {
+    TextView passTextEdit;
+
+    /**
+     *
+     * @param savedInstanceState
+     */
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        // set custom uncaught exception handler
+        Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
+
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_auth);
+
+        // global context
+        if (savedInstanceState == null) {
+            Global.globalContext = this;
+        }
+        //
+        startAppSetups();
+
+        // controls
+        passTextEdit = (EditText)findViewById(R.id.edittext_pass);
+        TextView textView = (TextView)findViewById(R.id.textView_app);
+        if (textView != null) {
+            String text = String.format("Приложение АГНКС, версия %s", BuildConfig.VERSION_NAME);
+            textView.setText(text);
+        }
+    }
+
+    /**
+     *
+     */
+    private void startAppSetups() {
+        // log
+        if (!Logger.isInit) {
+            Logger.initCacheDir(getBaseContext().getCacheDir().getAbsolutePath());
+            Logger.setLevel(Logger.ERROR | Logger.DEBUG | Logger.INFO | Logger.UNCAUGHT);
+
+            Logger.IsNeedLog = SettingsActivity.getPref(getString(R.string.pref_key_is_need_log), true);
+            Logger.LogFileMaxSize = SettingsActivity.getPref(getString(R.string.pref_key_log_max_size), Logger.LogFileMaxSize);
+            Logger.LogFileMaxEndLines = SettingsActivity.getPref(getString(R.string.pref_key_log_last_lines), Logger.LogFileMaxEndLines);
+
+            String start = String.format("Старт 'АГНКС'. AppId: [%s], Версия: [%s]", BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME);
+            Logger.add(start, Logger.INFO);
+        }
+
+        // access
+        Access.UserPass = SettingsActivity.getPref(getString(R.string.pref_key_user_pass), Access.UserPass);
+        Access.AdminPass = SettingsActivity.getPref(getString(R.string.pref_key_admin_pass), Access.AdminPass);
+    }
+
+    /**
+     *
+     * @param view
+     */
+    public void onApply(View view) {
+        String pass = passTextEdit.getText().toString();
+        int res = Access.checkAccess(pass);
+
+        if (res == Access.EMPTY_TYPE) {
+            MessageBox.shoter(this, "Введите пароль");
+            return;
+        }
+        if (res == Access.WRONG_TYPE) {
+            MessageBox.shoter(this, "Неверный пароль");
+            return;
+        }
+        applyAccess(res);
+    }
+
+    /**
+     *
+     * @param accessType
+     */
+    private void applyAccess(int accessType) {
+        String accessTypeName = Access.getAccessTypeName(accessType);
+        MessageBox.shoter(this, "Учетная запись: " + accessTypeName);
+        Logger.add("Вход под учетной записью: " + accessTypeName, Logger.INFO);
+        Access.setAccessType(accessType);
+
+        Intent intent = new Intent(this, BaseActivity.class);
+        startActivity(intent);
+        finish();
+    }
+}

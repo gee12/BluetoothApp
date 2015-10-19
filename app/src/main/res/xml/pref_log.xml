@@ -1,6 +1,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory android:title="@string/pref_header_log">
+    <PreferenceCategory android:key="@string/pref_key_category_log" android:title="@string/pref_header_log">
 
         <CheckBoxPreference
             android:defaultValue="true"
@@ -24,13 +24,20 @@
             android:inputType="number"
             android:key="@string/pref_key_log_last_lines"
             android:maxLength="5"
-            android:summary="Количество копируемых строк в новый лог-файл, если размер старого лог-файла превышает максимальный"
+            android:summary="Количество копируемых строк в новый лог-файл, если размер старого превышает максимальный"
             android:title="Количество строк" />
 
-        <PreferenceScreen
-            android:title="Показать логи">
+        <PreferenceScreen android:title="Показать логи"
+            android:dependency="@string/pref_key_is_need_log">
             <intent android:action="com.icon.agnks.LogActivity" />
         </PreferenceScreen>
+
+        <com.icon.utils.ClearLogsDialogPreference
+            android:dependency="@string/pref_key_is_need_log"
+            android:dialogTitle="Очистить лог-файл?"
+            android:key="@string/pref_key_clear_log"
+            android:summary="Нажмите для очистки"
+            android:title="Очистить логи" />
 
     </PreferenceCategory>
 

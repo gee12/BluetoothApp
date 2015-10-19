@@ -1,0 +1,25 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:key="@string/pref_key_category_access" android:title="@string/pref_header_access">
+
+        <EditTextPreference
+            android:defaultValue="0000"
+            android:dialogTitle="Пароль пользователя"
+            android:inputType="numberPassword"
+            android:key="@string/pref_key_user_pass"
+            android:maxLength="10"
+            android:summary="Сменить пароль"
+            android:title="Пароль пользователя" />
+
+        <EditTextPreference
+            android:defaultValue="1111"
+            android:dialogTitle="Пароль администратора"
+            android:inputType="numberPassword"
+            android:maxLength="10"
+            android:key="@string/pref_key_admin_pass"
+            android:summary="Сменить пароль"
+            android:title="Пароль администратора" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

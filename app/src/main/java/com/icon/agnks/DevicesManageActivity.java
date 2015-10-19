@@ -18,6 +18,7 @@ import com.icon.db.DBHelper;
 import com.icon.utils.Logger;
 import com.icon.utils.MessageBox;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DevicesManageActivity extends BaseListActivity {
@@ -26,6 +27,8 @@ public class DevicesManageActivity extends BaseListActivity {
     public final static int REQUEST_ADD_DEVICE = 2;
     public final static int REQUEST_EDIT_DEVICE = 3;
 //    public final static int REQUEST_DELETE_DEVICE = 4;
+    public final static String PARSEL_TAG_DEVICES = "PARSEL_TAG_DEVICES";
+//    public final static String PARSEL_TAG_DISCOVERED = "PARSEL_TAG_DISCOVERED";
 
     private BluetoothAdapter bluetoothAdapter;
     private BroadcastReceiver discoverDevicesReceiver;
@@ -68,7 +71,7 @@ public class DevicesManageActivity extends BaseListActivity {
         buttonDiscovery = (Button) findViewById(R.id.discovery_button);
         progressBar = (ProgressBar) findViewById(R.id.progressBarList);
 
-        if (savedInstanceState != null) return;
+//        if (savedInstanceState != null) return;
 
         //
         DevicesArrayAdapter.DevicesListener devicesListener = new DevicesArrayAdapter.DevicesListener() {
@@ -78,7 +81,7 @@ public class DevicesManageActivity extends BaseListActivity {
                 DevicesManageActivity.this.currentDevice = device;
                 Intent intent = new Intent(DevicesManageActivity.this, EditDeviceActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putSerializable(Device.KEY_DEVICE_OBJECT, device);
+                bundle.putParcelable(Device.KEY_DEVICE_OBJECT, device);
                 intent.putExtras(bundle);
                 startActivityForResult(intent, REQUEST_ADD_DEVICE);
             }
@@ -89,7 +92,7 @@ public class DevicesManageActivity extends BaseListActivity {
                 DevicesManageActivity.this.currentDevice = device;
                 Intent intent = new Intent(DevicesManageActivity.this, EditDeviceActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putSerializable(Device.KEY_DEVICE_OBJECT, device);
+                bundle.putParcelable(Device.KEY_DEVICE_OBJECT, device);
                 intent.putExtras(bundle);
                 startActivityForResult(intent, REQUEST_EDIT_DEVICE);
             }
@@ -104,7 +107,7 @@ public class DevicesManageActivity extends BaseListActivity {
                 // show programming activity
                 Intent intent = new Intent(DevicesManageActivity.this, ProgrDeviceActivity.class);
                 Bundle bundle = new Bundle();
-                bundle.putSerializable(Device.KEY_DEVICE_OBJECT, device);
+                bundle.putParcelable(Device.KEY_DEVICE_OBJECT, device);
                 intent.putExtras(bundle);
                 startActivity(intent);
             }
@@ -112,20 +115,43 @@ public class DevicesManageActivity extends BaseListActivity {
 
         //
         dbHelper = new DBHelper(this);
-        List<Device> dbDevices = dbHelper.getAllToList();
+
+        List<Device> devices = null;
+//        int discovered = 0;
+
+        if (savedInstanceState != null) {
+            devices = savedInstanceState.getParcelableArrayList(PARSEL_TAG_DEVICES);
+//            discovered = savedInstanceState.getInt(PARSEL_TAG_DISCOVERED);
+        }
+        else {
+            devices = dbHelper.getAllToList();
+        }
+
         //
         try {
             bluetoothAdapter = BluetoothUtils.getAdapter(this);
-            listAdapter = new DevicesArrayAdapter(this, getListView(), dbDevices, devicesListener);
+//            listAdapter = new DevicesArrayAdapter(this, getListView(), devices, discovered, devicesListener);
+            listAdapter = new DevicesArrayAdapter(this, getListView(), devices, devicesListener);
         } catch(Exception ex) {
             Logger.add(ex, Log.ERROR);
         }
         setListAdapter(listAdapter);
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        ArrayList<Device> devices = (ArrayList<Device>) listAdapter.getAllDevices();
+        outState.putParcelableArrayList(PARSEL_TAG_DEVICES, devices);
+
+//        int discovered = listAdapter.getDiscoveredCount();
+//        outState.putInt(PARSEL_TAG_DISCOVERED, discovered);
+
+        super.onSaveInstanceState(outState);
+    }
+
     /*
-    *
-     */
+        *
+         */
     public void discoverDevices(View view) {
 
         if (bluetoothAdapter == null) {
@@ -143,6 +169,7 @@ public class DevicesManageActivity extends BaseListActivity {
 
         if (!isDiscoveryAtWork) return;
 
+        //
         if (discoverDevicesReceiver == null) {
             discoverDevicesReceiver = new BroadcastReceiver() {
                 @Override
@@ -156,7 +183,7 @@ public class DevicesManageActivity extends BaseListActivity {
                 }
             };
         }
-
+        //
         if (discoveryFinishedReceiver == null) {
             discoveryFinishedReceiver = new BroadcastReceiver() {
                 @Override
@@ -165,7 +192,7 @@ public class DevicesManageActivity extends BaseListActivity {
                 }
             };
         }
-
+        //
         registerReceiver(discoverDevicesReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
         registerReceiver(discoveryFinishedReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
 
@@ -204,14 +231,12 @@ public class DevicesManageActivity extends BaseListActivity {
             }
         } else if (requestCode == REQUEST_ADD_DEVICE) {
             if (resultCode == RESULT_OK){
-//                Device added = (Device) data.getSerializableExtra(Device.KEY_DEVICE_OBJECT);
                 Device added = DevicesManageActivity.this.currentDevice;
                 added.CustomName = data.getStringExtra(Device.KEY_DEVICE_CUSTOM_NAME);
                 addDevice(added);
             }
         } else if (requestCode == REQUEST_EDIT_DEVICE) {
             if (resultCode == RESULT_OK){
-//                Device updated = (Device) data.getSerializableExtra(Device.KEY_DEVICE_OBJECT);
                 Device updated = DevicesManageActivity.this.currentDevice;
                 updated.CustomName = data.getStringExtra(Device.KEY_DEVICE_CUSTOM_NAME);
                 updateDevice(updated);

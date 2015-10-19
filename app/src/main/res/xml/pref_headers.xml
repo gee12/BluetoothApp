@@ -13,4 +13,10 @@
         <extra android:name="pref-resource" android:value="pref_bluetooth" />
     </header>
 
+    <header
+        android:fragment="com.icon.agnks.SettingsActivity$PrefsFragment"
+        android:title="@string/pref_header_access" >
+        <extra android:name="pref-resource" android:value="pref_access" />
+    </header>
+
 </preference-headers>

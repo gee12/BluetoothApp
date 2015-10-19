@@ -66,4 +66,7 @@
     <!-- Example settings for Bluetooth -->
     <string name="pref_header_bluetooth">Bluetooth</string>
 
+    <!-- Example settings for Access -->
+    <string name="pref_header_access">Учетные записи</string>
+
 </resources>
