@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="@string/pref_key_screen_log">
 
     <PreferenceCategory android:key="@string/pref_key_category_log" android:title="@string/pref_header_log">
 

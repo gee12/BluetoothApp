@@ -8,7 +8,6 @@ package com.icon.bluetooth;
  */
 public interface Communicator {
     void startCommunication();
-    void write(String message);
     void write(byte[] bytes);
     void stopCommunication();
 }

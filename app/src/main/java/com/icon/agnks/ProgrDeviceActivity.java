@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -34,8 +35,8 @@ public class ProgrDeviceActivity extends Activity {
     private Button buttonSetupConnect;
     private Button buttonSendMessage;
     private ProgressBar progressBarMain;
-    private TextView textData;
-    private EditText textMessage;
+    private TextView textView;
+    private EditText editText;
     private boolean isConnected;
 
     private class WriteTask extends AsyncTask<byte[], Void, Void> {
@@ -84,7 +85,10 @@ public class ProgrDeviceActivity extends Activity {
                     progressBarMain.setVisibility(View.INVISIBLE);
                     String connState = (isConnected) ? getString(R.string.str_close_connect) : getString(R.string.str_setup_connect);
                     buttonSetupConnect.setText(connState);
-                    setButtonsEnabled(true);
+//                    setButtonsEnabled(true);
+                    buttonSendMessage.setEnabled(true);
+                    buttonSetupConnect.setEnabled(true);
+                    editText.setEnabled(true);
                 }
             });
         }
@@ -98,8 +102,10 @@ public class ProgrDeviceActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_progr);
 
-        textData = (TextView) findViewById(R.id.data_text);
-        textMessage = (EditText) findViewById(R.id.message_text);
+        textView = (TextView) findViewById(R.id.data_text);
+        textView.setMovementMethod(new ScrollingMovementMethod());
+
+        editText = (EditText) findViewById(R.id.message_text);
         buttonSendMessage = (Button) findViewById(R.id.button_send_message);
         buttonSetupConnect = (Button) findViewById(R.id.button_setup_connect);
         progressBarMain = (ProgressBar) findViewById(R.id.progressBarMain);
@@ -160,7 +166,11 @@ public class ProgrDeviceActivity extends Activity {
         clientThread.start();
 
         progressBarMain.setVisibility(ProgressBar.VISIBLE);
-        setButtonsEnabled(false);
+//        setButtonsEnabled(false);
+        buttonSendMessage.setEnabled(false);
+        buttonSetupConnect.setEnabled(false);
+        editText.setEnabled(false);
+        textView.setText("");
     }
 
     public void closeClient() {
@@ -169,28 +179,43 @@ public class ProgrDeviceActivity extends Activity {
         }
         isConnected = false;
         buttonSetupConnect.setText(R.string.str_setup_connect);
+//        setButtonsEnabled(false);
+        buttonSendMessage.setEnabled(false);
+        editText.setEnabled(false);
+        textView.setText("");
     }
 
     /*
     *
     */
-    private void setButtonsEnabled(boolean isEnabled) {
-        buttonSendMessage.setEnabled(isEnabled);
-        buttonSetupConnect.setEnabled(isEnabled);
-    }
+//    private void setButtonsEnabled(boolean isEnabled) {
+//        buttonSendMessage.setEnabled(isEnabled);
+//        buttonSetupConnect.setEnabled(isEnabled);
+//        editText.setEnabled(isEnabled);
+//        if (!isEnabled) textView.setText("");
+//    }
 
     /*
     *
     */
     public void sendMessage(View view) {
-        sendMessage(textMessage.getText().toString());
-        textMessage.setText("");
+        sendMessage(editText.getText().toString());
+        editText.setText("");
     }
 
     public void sendMessage(String str) {
         if (clientThread != null && clientThread.isConnected()) {
-            char[] chars = (str + "\r\n").toCharArray();
-            byte[] bytes = Utils.toBytes(chars);
+//            char[] chars = (str/* + "\r\n"*/).toCharArray();
+//            byte[] bytes = Utils.toBytes(chars);
+            Byte parsed = null;
+            Integer parsedInt = null;
+            try {
+                parsedInt = Integer.parseInt(str);
+//                if (parsedInt <= 255 && parsedInt >= 0)
+//                    parsed = ((byte)parsedInt) ;//& 0xFF;
+            } catch(Exception ex) {
+            }
+            byte[] bytes = (parsedInt != null) ? Utils.intToByteArray(parsedInt) : new byte[]{(byte)0};
 
             new WriteTask().execute(bytes);
 
@@ -205,7 +230,7 @@ public class ProgrDeviceActivity extends Activity {
     *
      */
     private void appendTextData(String text) {
-        textData.setText(textData.getText() + "\n" + text);
+        textView.setText(textView.getText() + "\n" + text);
     }
 
     /*

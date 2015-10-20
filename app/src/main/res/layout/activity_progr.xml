@@ -3,8 +3,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout android:layout_width="match_parent"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:focusableInTouchMode="true"
         android:orientation="vertical">
 
         <Button
@@ -23,31 +25,35 @@
             android:id="@+id/message_text"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:enabled="false"
+            android:gravity="top|left"
             android:hint="@string/str_command_hint"
-            android:lines="2"
-            android:gravity="top|left" />
+            android:inputType="number"
+            android:lines="2" />
 
         <Button
-            android:layout_width="fill_parent"
-            android:onClick="sendMessage"
-            android:text="@string/str_send_command"
-            android:layout_gravity="bottom"
             android:id="@+id/button_send_message"
-            android:layout_height="wrap_content" />
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:enabled="false"
+            android:onClick="sendMessage"
+            android:text="@string/str_send_command" />
 
         <TextView
             android:id="@+id/data_text"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
 
     </LinearLayout>
 
     <ProgressBar
+        android:id="@+id/progressBarMain"
+        style="@android:style/Widget.ProgressBar.Large"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/progressBarMain"
         android:layout_centerInParent="true"
-        android:visibility="invisible"
-        style="@android:style/Widget.ProgressBar.Large" />
+        android:visibility="invisible" />
 
 </RelativeLayout>

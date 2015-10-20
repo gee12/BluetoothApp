@@ -69,15 +69,6 @@ public class CommunicationThread extends Thread implements Communicator {
         }
     }
 
-    public void write(String message) {
-        try {
-            outputStream.write(message.getBytes());
-            Logger.add("CommunicationThread: Write: [" + message + "]", Log.DEBUG);
-        } catch (IOException ex) {
-            Logger.add("CommunicationThread: Write to OutputStream", ex, Log.ERROR);
-        }
-    }
-
     public void write(byte[] bytes) {
         try {
             Logger.add("CommunicationThread: Write: [" + Utils.bytesToHex(bytes) + "]", Log.DEBUG);

@@ -31,9 +31,24 @@ public class Utils {
 
     public static String bytesToHex(byte[] a) {
         StringBuilder sb = new StringBuilder(a.length * 2);
-        for(byte b: a)
+        for(byte b : a)
             sb.append(String.format("%02x", b & 0xff));
         return sb.toString();
+    }
+
+    public static String intsToHex(int[] a) {
+        StringBuilder sb = new StringBuilder();
+        for(int i : a)
+            sb.append(Integer.toHexString(i));
+        return sb.toString();
+    }
+
+    public static byte[] intToByteArray(int value) {
+        return new byte[] {
+                (byte)(value >>> 24),
+                (byte)(value >>> 16),
+                (byte)(value >>> 8),
+                (byte)value};
     }
 
     public static byte toByte(boolean bool) {

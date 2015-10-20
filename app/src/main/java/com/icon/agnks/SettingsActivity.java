@@ -70,9 +70,10 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
 
     private void makeAccess() {
         if (!Access.isAdmin()) {
-            PreferenceScreen screen = getPreferenceScreen();
             // log category
-            PreferenceCategory logPrefCat = (PreferenceCategory)findPreference(getString(R.string.pref_key_category_log));
+//            PreferenceScreen screen = getPreferenceScreen();
+            PreferenceScreen screen = (PreferenceScreen) findPreference(getString(R.string.pref_key_screen_log));
+            PreferenceCategory logPrefCat = (PreferenceCategory) findPreference(getString(R.string.pref_key_category_log));
             screen.removePreference(logPrefCat);
 
             // pass
@@ -119,13 +120,21 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         @Override
         public void onCreate(Bundle aSavedState) {
             super.onCreate(aSavedState);
+
             Context anAct = getActivity().getApplicationContext();
             int thePrefRes = anAct.getResources().getIdentifier(getArguments().getString("pref-resource"),
                     "xml",anAct.getPackageName());
             addPreferencesFromResource(thePrefRes);
+
+//            get
         }
     }
 
+    /**
+     *
+     * @param key
+     * @param value
+     */
     public static void putPref(String key, String value) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Global.globalContext);
         SharedPreferences.Editor editor = prefs.edit();
@@ -153,6 +162,9 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         return preferences.getBoolean(key, defValue);
     }
 
+    /**
+     *
+     */
     @Override
     protected void onResume() {
         super.onResume();
