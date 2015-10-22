@@ -1,7 +1,4 @@
-package interosite.ru.bluetoothdemo;
-
-import java.io.IOException;
-import java.util.UUID;
+package com.icon.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothServerSocket;
@@ -10,15 +7,18 @@ import android.util.Log;
 
 import com.icon.utils.Logger;
 
-public class ServerThread_old extends Thread {
+import java.io.IOException;
+import java.util.UUID;
+
+public class ServerThread extends Thread {
 
     private final BluetoothServerSocket bluetoothServerSocket;
-    private final CommunicatorService communicatorService;
+    private final CommunicationThread.CommunicatorService communicatorService;
 
-    public ServerThread_old(CommunicatorService communicatorService, BluetoothAdapter bluetoothAdapter, boolean isInsecure) {
+    public ServerThread(CommunicationThread.CommunicatorService communicatorService, BluetoothAdapter bluetoothAdapter, boolean isInsecure) {
         this.communicatorService = communicatorService;
         //final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        final UUID uuid = UUID.fromString(TestActivity_old.UUID);
+        final UUID uuid = UUID.fromString(TestActivity.UUID);
 
         BluetoothServerSocket tmp = null;
         try {
@@ -48,7 +48,7 @@ public class ServerThread_old extends Thread {
             }
             if (socket != null) {
 //                socket.getOutputStream().
-                communicatorService.createCommunicatorThread(socket).startCommunication();
+                communicatorService.createCommunicationThread(socket).startCommunication();
             }
         }
     }

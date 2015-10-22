@@ -10,14 +10,14 @@
     <string name="str_discover_devices">Найти устройства</string>
     <string name="str_stop_discover_devices">Остановить поиск</string>
     <string name="str_prompt_enter_message">Текст сообщения:</string>
-    <string name="str_command">Команда:</string>
+    <string name="str_data">Данные (разделитель чисел: \' , \' ):</string>
     <string name="str_setup_connect">Установить соединение</string>
     <string name="str_close_connect">Закрыть соединение</string>
     <string name="str_send_message">Отправить сообщение</string>
     <string name="str_send_command">Отправить</string>
     <string name="str_send_test_message">Отправить тестовую команду</string>
     <string name="str_message_for_device">Текст сообщения</string>
-    <string name="str_command_hint">Текст команды</string>
+    <string name="str_data_hint">Введите данные</string>
     <string name="str_message_received">Полученное сообщение</string>
 
     <!-- AboutActivity -->
@@ -63,5 +63,6 @@
     <string name="pref_key_category_access">pref_key_category_access</string>
     <string name="pref_key_category_log">pref_key_category_log</string>
     <string name="pref_key_screen_log">pref_key_screen_log</string>
+    <string name="pref_key_screen_access">pref_key_screen_access</string>
 
 </resources>

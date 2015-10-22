@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import com.icon.utils.Utils;
 
@@ -23,7 +24,7 @@ public class Device implements /*Serializable,*/ Comparable<Device>, Parcelable 
     public static final String KEY_DEVICE_CUSTOM_NAME = "CustomName";
 //    public static final String KEY_DEVICE_MAC_ADDRESS = "MacAddress";
 
-    public static String UNKNOWN_DEVICE = "Неизвестное устройство";
+    public static String UNKNOWN_DEVICE = "UnknownDevice";
     public static String DEF_MAC_ADDRESS = "0000";
 
     public static final int STATE_OFFLINE = 1;
@@ -62,14 +63,9 @@ public class Device implements /*Serializable,*/ Comparable<Device>, Parcelable 
         this.IsSaved = parcel.readByte() != 0;
     }
 
-    public Device(String name, String addr, int state) {
-        init(name, name, addr, state);
-    }
-
-    public void init(/*BluetoothDevice device,*/ String deviceName, String customName, String addr, int state) {
-//        this.BTDevice = device;
-        this.CustomName = deviceName;
-        this.DeviceName = customName;
+    public void init(String deviceName, String customName, String addr, int state) {
+        this.DeviceName = (deviceName==null || deviceName.isEmpty()) ? UNKNOWN_DEVICE : deviceName ;
+        this.CustomName = (customName==null || customName.isEmpty()) ? DeviceName : customName;
         this.MacAddress = addr;
         this.State = state;
     }
@@ -100,7 +96,7 @@ public class Device implements /*Serializable,*/ Comparable<Device>, Parcelable 
     }
 
     @Override
-    public int compareTo(Device another) {
+    public int compareTo(@NonNull Device another) {
         return (equals(another)) ? 0 : -1;
     }
 

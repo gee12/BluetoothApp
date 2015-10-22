@@ -48,7 +48,7 @@ public class AuthActivity extends Activity {
     }
 
     /**
-     *
+     * Установка настроек при старте приложения
      */
     private void startAppSetups() {
         // log
@@ -70,14 +70,14 @@ public class AuthActivity extends Activity {
     }
 
     /**
-     *
+     * Проверяем введенный пароль и запускаем главную активность
      * @param view
      */
     public void onApply(View view) {
         String pass = passTextEdit.getText().toString();
 
-        int res = Access.ADMIN_TYPE;
-//        int res = Access.checkAccess(pass);
+//        int res = Access.ADMIN_TYPE;
+        int res = Access.checkAccess(pass);
 
         if (res == Access.EMPTY_TYPE) {
             MessageBox.shoter(this, "Введите пароль");

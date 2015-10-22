@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--<header-->
+        <!--android:fragment="com.icon.agnks.SettingsActivity$PrefsFragment"-->
+        <!--android:title="@string/pref_header_log" >-->
+        <!--<extra android:name="pref-resource" android:value="pref_log" />-->
+    <!--</header>-->
+
     <header
         android:fragment="com.icon.agnks.SettingsActivity$PrefsFragment"
-        android:title="@string/pref_header_log" >
-        <extra android:name="pref-resource" android:value="pref_log" />
+        android:title="@string/pref_header_access" >
+        <extra android:name="pref-resource" android:value="pref_access" />
     </header>
 
     <header
         android:fragment="com.icon.agnks.SettingsActivity$PrefsFragment"
         android:title="@string/pref_header_bluetooth" >
         <extra android:name="pref-resource" android:value="pref_bluetooth" />
-    </header>
-
-    <header
-        android:fragment="com.icon.agnks.SettingsActivity$PrefsFragment"
-        android:title="@string/pref_header_access" >
-        <extra android:name="pref-resource" android:value="pref_access" />
     </header>
 
 </preference-headers>

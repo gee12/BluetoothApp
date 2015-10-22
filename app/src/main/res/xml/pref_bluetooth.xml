@@ -4,6 +4,7 @@
 
         <Preference android:title="Параметры Bluetooth">
             <intent android:action="android.settings.BLUETOOTH_SETTINGS" />
+            <!--<intent android:action="com.android.settings.bluetooth.BluetoothSettings" />-->
         </Preference>
 
     </PreferenceCategory>

@@ -28,7 +28,6 @@ public class DevicesManageActivity extends BaseListActivity {
     public final static int REQUEST_EDIT_DEVICE = 3;
 //    public final static int REQUEST_DELETE_DEVICE = 4;
     public final static String PARSEL_TAG_DEVICES = "PARSEL_TAG_DEVICES";
-//    public final static String PARSEL_TAG_DISCOVERED = "PARSEL_TAG_DISCOVERED";
 
     private BluetoothAdapter bluetoothAdapter;
     private BroadcastReceiver discoverDevicesReceiver;
@@ -117,11 +116,9 @@ public class DevicesManageActivity extends BaseListActivity {
         dbHelper = new DBHelper(this);
 
         List<Device> devices = null;
-//        int discovered = 0;
 
         if (savedInstanceState != null) {
             devices = savedInstanceState.getParcelableArrayList(PARSEL_TAG_DEVICES);
-//            discovered = savedInstanceState.getInt(PARSEL_TAG_DISCOVERED);
         }
         else {
             devices = dbHelper.getAllToList();
@@ -130,7 +127,6 @@ public class DevicesManageActivity extends BaseListActivity {
         //
         try {
             bluetoothAdapter = BluetoothUtils.getAdapter(this);
-//            listAdapter = new DevicesArrayAdapter(this, getListView(), devices, discovered, devicesListener);
             listAdapter = new DevicesArrayAdapter(this, getListView(), devices, devicesListener);
         } catch(Exception ex) {
             Logger.add(ex, Log.ERROR);
@@ -143,9 +139,6 @@ public class DevicesManageActivity extends BaseListActivity {
         ArrayList<Device> devices = (ArrayList<Device>) listAdapter.getAllDevices();
         outState.putParcelableArrayList(PARSEL_TAG_DEVICES, devices);
 
-//        int discovered = listAdapter.getDiscoveredCount();
-//        outState.putInt(PARSEL_TAG_DISCOVERED, discovered);
-
         super.onSaveInstanceState(outState);
     }
 
@@ -157,6 +150,7 @@ public class DevicesManageActivity extends BaseListActivity {
         if (bluetoothAdapter == null) {
             MessageBox.shoter(this, "Не найден Bluetooth адаптер на устройстве");
             finish();
+            return;
         }
 
         if (!bluetoothAdapter.isEnabled()) {
@@ -174,11 +168,15 @@ public class DevicesManageActivity extends BaseListActivity {
             discoverDevicesReceiver = new BroadcastReceiver() {
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    String action = intent.getAction();
-                    if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                        final BluetoothDevice btDevice = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                        final Device device = new Device(btDevice, Device.STATE_ONLINE);
-                        listAdapter.addFoundedDevice(device);
+                    try {
+                        String action = intent.getAction();
+                        if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+                            final BluetoothDevice btDevice = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+                            final Device device = new Device(btDevice, Device.STATE_ONLINE);
+                            listAdapter.addFoundedDevice(device);
+                        }
+                    } catch(Exception ex) {
+                        Logger.add("DevicesManageActivity.discoverDevices(): BroadcastReceiver.onReceive(): ", ex, Logger.ERROR);
                     }
                 }
             };

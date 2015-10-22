@@ -19,16 +19,38 @@
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/str_command" />
+            android:layout_margin="5dp"
+            android:text="@string/str_data" />
+
+        <RadioGroup
+            android:id="@+id/radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <RadioButton
+                android:id="@+id/radio_dec"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="dec"/>
+            <RadioButton
+                android:id="@+id/radio_hex"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hex"/>
+        </RadioGroup>
+
 
         <EditText
             android:id="@+id/message_text"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
+            android:layout_margin="5dp"
             android:gravity="top|left"
-            android:hint="@string/str_command_hint"
-            android:inputType="number"
+            android:hint="@string/str_data_hint"
+            android:digits="0123456789ABCDEF,abcdef"
+            android:inputType="textCapCharacters"
             android:lines="2" />
 
         <Button
@@ -40,11 +62,17 @@
             android:onClick="sendMessage"
             android:text="@string/str_send_command" />
 
-        <TextView
-            android:id="@+id/data_text"
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical" />
+        <ScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fillViewport="true"
+            android:scrollbars="vertical">
+            <TextView
+                android:id="@+id/data_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </ScrollView>
 
     </LinearLayout>
 

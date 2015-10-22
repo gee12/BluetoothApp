@@ -13,6 +13,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.RadioGroup;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.icon.bluetooth.BluetoothUtils;
@@ -22,6 +24,8 @@ import com.icon.bluetooth.Communicator;
 import com.icon.utils.Logger;
 import com.icon.utils.MessageBox;
 import com.icon.utils.Utils;
+
+import java.util.Arrays;
 
 public class ProgrDeviceActivity extends Activity {
 
@@ -35,9 +39,11 @@ public class ProgrDeviceActivity extends Activity {
     private Button buttonSetupConnect;
     private Button buttonSendMessage;
     private ProgressBar progressBarMain;
+    private ScrollView scrollView;
     private TextView textView;
     private EditText editText;
     private boolean isConnected;
+    private int radix = Utils.RADIX_DEC;
 
     private class WriteTask extends AsyncTask<byte[], Void, Void> {
         @Override
@@ -58,12 +64,13 @@ public class ProgrDeviceActivity extends Activity {
             return new CommunicationThread(socket, new CommunicationThread.CommunicationListener() {
 
                 @Override
-                public void onMessage(final String message) {
+                public void onMessage(final byte[] bytes) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            String message = Utils.toString(bytes, ",", Utils.RADIX_HEX);
                             appendTextData("Принято: " + message);
-                            Logger.add("DevicesManageActivity: Message received: " + message, Log.INFO);
+                            Logger.add("ProgrDeviceActivity: Received: [" + message + "]", Log.INFO);
                         }
                     });
                 }
@@ -104,6 +111,7 @@ public class ProgrDeviceActivity extends Activity {
 
         textView = (TextView) findViewById(R.id.data_text);
         textView.setMovementMethod(new ScrollingMovementMethod());
+        scrollView = (ScrollView)findViewById(R.id.scrollView);
 
         editText = (EditText) findViewById(R.id.message_text);
         buttonSendMessage = (Button) findViewById(R.id.button_send_message);
@@ -133,6 +141,19 @@ public class ProgrDeviceActivity extends Activity {
             finish();
         }
 
+        RadioGroup radioGroup = (RadioGroup)findViewById(R.id.radio_group);
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                switch(checkedId) {
+                    case R.id.radio_dec:
+                        radix = Utils.RADIX_DEC;
+                        break;
+                    case R.id.radio_hex:
+                        radix = Utils.RADIX_HEX;
+                }
+            }
+        });
     }
 
     /*
@@ -207,20 +228,29 @@ public class ProgrDeviceActivity extends Activity {
         if (clientThread != null && clientThread.isConnected()) {
 //            char[] chars = (str/* + "\r\n"*/).toCharArray();
 //            byte[] bytes = Utils.toBytes(chars);
-            Byte parsed = null;
-            Integer parsedInt = null;
+//            Byte parsed = null;
+//            Integer parsedInt = null;
+//            try {
+//                parsedInt = Integer.parseInt(str);
+////                if (parsedInt <= 255 && parsedInt >= 0)
+////                    parsed = ((byte)parsedInt) ;//& 0xFF;
+//            } catch(Exception ex) {
+//            }
+//            byte[] bytes = (parsedInt != null) ? Utils.intToByteArray(parsedInt) : new byte[]{(byte)0};
+//
+            byte[] bytes = null;
             try {
-                parsedInt = Integer.parseInt(str);
-//                if (parsedInt <= 255 && parsedInt >= 0)
-//                    parsed = ((byte)parsedInt) ;//& 0xFF;
+                bytes = Utils.stringToBytes(str, ",", radix);
             } catch(Exception ex) {
+                MessageBox.shoter(this, "Не удается распарсить данные");
             }
-            byte[] bytes = (parsedInt != null) ? Utils.intToByteArray(parsedInt) : new byte[]{(byte)0};
-
-            new WriteTask().execute(bytes);
+            if (bytes != null) {
+                new WriteTask().execute(bytes);
+                appendTextData("Отправлено: " + Utils.toString(bytes, ",", radix));
+            }
 
 //            Toast.makeText(this, "Сообщение [" + str + "] отправлено", Toast.LENGTH_SHORT).show();
-            appendTextData("Отправлено: " + str);
+//            appendTextData("Отправлено: " + str);
         } else {
             MessageBox.shoter(this, "Сначала соединитесь с другим устройством");
         }
@@ -231,6 +261,16 @@ public class ProgrDeviceActivity extends Activity {
      */
     private void appendTextData(String text) {
         textView.setText(textView.getText() + "\n" + text);
+        scrollToBottom();
+    }
+
+    private void scrollToBottom()
+    {
+        scrollView.post(new Runnable() {
+            public void run() {
+                scrollView.smoothScrollTo(0, textView.getBottom());
+            }
+        });
     }
 
     /*

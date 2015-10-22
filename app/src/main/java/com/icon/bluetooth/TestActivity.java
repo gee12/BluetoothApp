@@ -71,10 +71,11 @@ public class TestActivity extends BaseListActivity {
             return new CommunicationThread(socket, new CommunicationThread.CommunicationListener() {
 
                 @Override
-                public void onMessage(final String message) {
+                public void onMessage(final byte[] bytes) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
+                            String message = Utils.toString(bytes, ",", Utils.RADIX_HEX);
                             appendTextData("Принято: " + message);
                             Logger.add("TestActivity: Message received: " + message, Log.INFO);
                         }

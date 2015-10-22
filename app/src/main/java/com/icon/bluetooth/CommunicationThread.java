@@ -10,6 +10,7 @@ import com.icon.utils.Utils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 
 public class CommunicationThread extends Thread implements Communicator {
 
@@ -19,7 +20,8 @@ public class CommunicationThread extends Thread implements Communicator {
     }
 
     public interface CommunicationListener {
-        void onMessage(String message);
+//        void onMessage(String message);
+        void onMessage(byte[] bytes);
     }
 
     private final BluetoothSocket socket;
@@ -60,7 +62,8 @@ public class CommunicationThread extends Thread implements Communicator {
                 bytes = inputStream.read(buffer);
                 Logger.add("CommunicationThread: Read " + bytes + " bytes", Log.DEBUG);
 
-                listener.onMessage(new String(buffer).substring(0, bytes));
+//                listener.onMessage(new String(buffer).substring(0, bytes));
+                listener.onMessage(Arrays.copyOfRange(buffer, 0, bytes));
 
             } catch (IOException ex) {
                 Logger.add("CommunicationThread: Run the communicator", ex, Log.ERROR);
@@ -71,7 +74,7 @@ public class CommunicationThread extends Thread implements Communicator {
 
     public void write(byte[] bytes) {
         try {
-            Logger.add("CommunicationThread: Write: [" + Utils.bytesToHex(bytes) + "]", Log.DEBUG);
+            Logger.add("CommunicationThread: Write: [" + Utils.toString(bytes, ",", Utils.RADIX_HEX) + "]", Log.DEBUG);
             outputStream.write(bytes);
         } catch (IOException ex) {
             Logger.add("CommunicationThread: Write to OutputStream", ex, Log.ERROR);

@@ -1,8 +1,11 @@
 package com.icon.agnks;
 
 import android.annotation.TargetApi;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -23,6 +26,8 @@ import java.util.List;
  * Created by Ivan on 09.10.2015.
  */
 public class SettingsActivity extends PreferenceActivity /*implements SharedPreferences.OnSharedPreferenceChangeListener*/ {
+    public static final String TAG_PREF_RES = "pref_res";
+
     protected Method mLoadHeaders = null;
     protected Method mHasHeaders = null;
     SharedPreferences.OnSharedPreferenceChangeListener listener;
@@ -53,10 +58,16 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         } catch (NoSuchMethodException e) {
         }
         super.onCreate(aSavedState);
+
+        // добавление разделов настроек для девайсов с API < 11
         if (!isNewV11Prefs()) {
-            addPreferencesFromResource(R.xml.pref_log);
+
+            if (Access.isAdmin())
+                addPreferencesFromResource(R.xml.pref_log);
             addPreferencesFromResource(R.xml.pref_bluetooth);
             addPreferencesFromResource(R.xml.pref_access);
+
+            makeAccess(getPreferenceManager(),getResources());
         }
 
         listener = new SharedPreferences.OnSharedPreferenceChangeListener() {
@@ -64,38 +75,49 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
                         SettingsActivity.this.onSharedPreferenceChanged(prefs, key);
                     }
                 };
-
-        makeAccess();
     }
 
-    private void makeAccess() {
-        if (!Access.isAdmin()) {
-            // log category
-//            PreferenceScreen screen = getPreferenceScreen();
-            PreferenceScreen screen = (PreferenceScreen) findPreference(getString(R.string.pref_key_screen_log));
-            PreferenceCategory logPrefCat = (PreferenceCategory) findPreference(getString(R.string.pref_key_category_log));
-            screen.removePreference(logPrefCat);
-
+    public static void makeAccess(PreferenceManager manager, Resources res) {
+        if (!Access.isAdmin()){
             // pass
-            Preference adminPassPref = findPreference(getString(R.string.pref_key_admin_pass));
-            PreferenceCategory accessPrefCat = (PreferenceCategory)findPreference(getString(R.string.pref_key_category_access));
-            accessPrefCat.removePreference(adminPassPref);
+            Preference adminPassPref = manager.findPreference(res.getString(R.string.pref_key_admin_pass));
+            PreferenceCategory accessPrefCat = (PreferenceCategory)manager.findPreference(res.getString(R.string.pref_key_category_access));
+            if (accessPrefCat!=null && adminPassPref!=null) accessPrefCat.removePreference(adminPassPref);
         }
     }
 
+    /**
+     * Добавление разделов настроек как хеадеров для девайсов с API >= 11
+     * @param aTarget
+     */
     @Override
     public void onBuildHeaders(List<Header> aTarget) {
         try {
-            mLoadHeaders.invoke(this,new Object[]{R.xml.pref_headers,aTarget});
+            mLoadHeaders.invoke(this, new Object[]{R.xml.pref_headers, aTarget});
+
+            if (Access.isAdmin() && android.os.Build.VERSION.SDK_INT >= 11) {
+                Header logHeader = new Header();
+                logHeader.title = "Логи";
+                logHeader.fragment = PrefsFragment.class.getName();
+
+                Bundle bundle = new Bundle();
+                bundle.putInt(TAG_PREF_RES, R.xml.pref_log);
+                logHeader.fragmentArguments = bundle;
+
+                aTarget.add(0, logHeader);
+            }
+
         } catch (IllegalArgumentException e) {
         } catch (IllegalAccessException e) {
         } catch (InvocationTargetException e) {
         }
     }
 
-    /*
-    *
-    */
+    /**
+     * Обработчик изменения настроек
+     * @param sharedPreferences
+     * @param key
+     */
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         String isNeedLogKey = getString(R.string.pref_key_is_need_log);
         String maxSizeKey = getString(R.string.pref_key_log_max_size);
@@ -115,23 +137,68 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         }
     }
 
+    /**
+     * Класс фрагмента для девайсов с API >= 11
+     */
     @TargetApi(11)
     static public class PrefsFragment extends PreferenceFragment {
+
         @Override
         public void onCreate(Bundle aSavedState) {
             super.onCreate(aSavedState);
 
-            Context anAct = getActivity().getApplicationContext();
-            int thePrefRes = anAct.getResources().getIdentifier(getArguments().getString("pref-resource"),
-                    "xml",anAct.getPackageName());
-            addPreferencesFromResource(thePrefRes);
+            int prefRes = -1;
+            if (aSavedState == null) {
+                prefRes = getArguments().getInt(TAG_PREF_RES, -1);
+            } else {
+                prefRes = aSavedState.getInt(TAG_PREF_RES);
+            }
+            if (prefRes != -1) {
+                addPreferencesFromResource(prefRes);
+            } else {
+                Context anAct = getActivity().getApplicationContext();
+                prefRes = getResources().getIdentifier(getArguments().getString("pref-resource"),
+                        "xml", anAct.getPackageName());
+                addPreferencesFromResource(prefRes);
+            }
 
-//            get
+            if (!Access.isAdmin()) {
+                if (prefRes == R.xml.pref_access) {
+//                PreferenceScreen screen = getPreferenceScreen();
+//                if (screen != null && screen.getKey().equals(getString(R.string.pref_key_screen_access))) {
+                    SettingsActivity.makeAccess(getPreferenceManager(),getResources());
+                }
+            }
         }
+
+    }
+
+    @Override
+    protected boolean isValidFragment(String fragmentName) {
+        return PrefsFragment.class.getName().equals(fragmentName);
     }
 
     /**
      *
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        getPreferenceScreen().getSharedPreferences()
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(listener);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+//        getPreferenceScreen().getSharedPreferences()
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(listener);
+    }
+
+    /**
+     * Установка значения опции
      * @param key
      * @param value
      */
@@ -147,6 +214,12 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         return preferences.getString(key, null);
     }
 
+    /**
+     * Получения значения опции
+     * @param key
+     * @param defValue
+     * @return
+     */
     public static String getPref(String key, String defValue) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Global.globalContext);
         return preferences.getString(key, defValue);
@@ -160,22 +233,5 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
     public static boolean getPref(String key, boolean defValue) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Global.globalContext);
         return preferences.getBoolean(key, defValue);
-    }
-
-    /**
-     *
-     */
-    @Override
-    protected void onResume() {
-        super.onResume();
-        getPreferenceScreen().getSharedPreferences()
-                .registerOnSharedPreferenceChangeListener(listener);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        getPreferenceScreen().getSharedPreferences()
-                .unregisterOnSharedPreferenceChangeListener(listener);
     }
 }

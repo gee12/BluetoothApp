@@ -1,9 +1,10 @@
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="@string/pref_key_screen_access">
 
     <PreferenceCategory android:key="@string/pref_key_category_access" android:title="@string/pref_header_access">
 
         <EditTextPreference
-            android:defaultValue="0000"
+            android:defaultValue="1111"
             android:dialogTitle="Пароль пользователя"
             android:inputType="numberPassword"
             android:key="@string/pref_key_user_pass"
@@ -12,7 +13,7 @@
             android:title="Пароль пользователя" />
 
         <EditTextPreference
-            android:defaultValue="1111"
+            android:defaultValue="2222"
             android:dialogTitle="Пароль администратора"
             android:inputType="numberPassword"
             android:maxLength="10"
