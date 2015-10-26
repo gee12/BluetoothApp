@@ -1,4 +1,4 @@
-package com.icon.agnks;
+package com.icon.activities;
 
 import android.app.ListActivity;
 import android.os.Bundle;

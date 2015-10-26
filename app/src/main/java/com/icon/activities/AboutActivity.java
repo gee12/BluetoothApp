@@ -1,4 +1,4 @@
-package com.icon.agnks;
+package com.icon.activities;
 
 import android.os.Bundle;
 import android.widget.TextView;

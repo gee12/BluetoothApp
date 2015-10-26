@@ -1,4 +1,4 @@
-package com.icon.utils;
+package com.icon.agnks;
 
 /**
  * Created by Ivan on 19.10.2015.

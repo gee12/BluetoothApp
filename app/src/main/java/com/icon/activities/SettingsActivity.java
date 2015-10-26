@@ -1,22 +1,20 @@
-package com.icon.agnks;
+package com.icon.activities;
 
 import android.annotation.TargetApi;
-import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Bundle;
+import android.preference.DialogPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
+import android.util.AttributeSet;
 
-import com.icon.utils.Access;
-import com.icon.utils.Global;
-import com.icon.utils.Logger;
+import com.icon.agnks.Access;
+import com.icon.agnks.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -62,11 +60,13 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         // добавление разделов настроек для девайсов с API < 11
         if (!isNewV11Prefs()) {
 
+            // no add Log preference, if login like not Admin
             if (Access.isAdmin())
                 addPreferencesFromResource(R.xml.pref_log);
             addPreferencesFromResource(R.xml.pref_bluetooth);
             addPreferencesFromResource(R.xml.pref_access);
 
+            // hide some preferences
             makeAccess(getPreferenceManager(),getResources());
         }
 
@@ -77,6 +77,11 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
                 };
     }
 
+    /***
+     * Скрываем некоторые настройки, если залогинись не как Администратор
+     * @param manager
+     * @param res
+     */
     public static void makeAccess(PreferenceManager manager, Resources res) {
         if (!Access.isAdmin()){
             // pass
@@ -107,9 +112,7 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
                 aTarget.add(0, logHeader);
             }
 
-        } catch (IllegalArgumentException e) {
-        } catch (IllegalAccessException e) {
-        } catch (InvocationTargetException e) {
+        } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
         }
     }
 
@@ -147,21 +150,22 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         public void onCreate(Bundle aSavedState) {
             super.onCreate(aSavedState);
 
+            // get preference resource id
             int prefRes = -1;
             if (aSavedState == null) {
                 prefRes = getArguments().getInt(TAG_PREF_RES, -1);
             } else {
                 prefRes = aSavedState.getInt(TAG_PREF_RES);
             }
-            if (prefRes != -1) {
-                addPreferencesFromResource(prefRes);
-            } else {
+            if (prefRes == -1) {
                 Context anAct = getActivity().getApplicationContext();
                 prefRes = getResources().getIdentifier(getArguments().getString("pref-resource"),
                         "xml", anAct.getPackageName());
-                addPreferencesFromResource(prefRes);
             }
 
+            addPreferencesFromResource(prefRes);
+
+            // hide preferences, if login like not Admin
             if (!Access.isAdmin()) {
                 if (prefRes == R.xml.pref_access) {
 //                PreferenceScreen screen = getPreferenceScreen();
@@ -197,41 +201,4 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
                 .unregisterOnSharedPreferenceChangeListener(listener);
     }
 
-    /**
-     * Установка значения опции
-     * @param key
-     * @param value
-     */
-    public static void putPref(String key, String value) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(Global.globalContext);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(key, value);
-        editor.apply();
-    }
-
-    public static String getPref(String key) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Global.globalContext);
-        return preferences.getString(key, null);
-    }
-
-    /**
-     * Получения значения опции
-     * @param key
-     * @param defValue
-     * @return
-     */
-    public static String getPref(String key, String defValue) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Global.globalContext);
-        return preferences.getString(key, defValue);
-    }
-
-    public static int getPref(String key, int defValue) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Global.globalContext);
-        return Integer.parseInt(preferences.getString(key, String.valueOf(defValue)));
-    }
-
-    public static boolean getPref(String key, boolean defValue) {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(Global.globalContext);
-        return preferences.getBoolean(key, defValue);
-    }
 }

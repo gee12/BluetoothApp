@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.icon.utils.Logger;
+import com.icon.agnks.Logger;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -25,7 +25,7 @@ public class ServerThread extends Thread {
             tmp = (isInsecure) ? bluetoothAdapter.listenUsingInsecureRfcommWithServiceRecord("BluetoothApp", uuid)
                     : bluetoothAdapter.listenUsingRfcommWithServiceRecord("BluetoothApp", uuid);
         } catch (IOException ex) {
-            Logger.add("ServerThread_old: Create BluetoothServerSocket", ex, Log.ERROR);
+            Logger.add("ServerThread_old: Create BluetoothServerSocket", ex);
         }
         bluetoothServerSocket = tmp;
     }
@@ -43,7 +43,7 @@ public class ServerThread extends Thread {
 
                 bluetoothServerSocket.close();
             } catch (IOException ex) {
-                Logger.add("ServerThread_old: Run", ex, Log.ERROR);
+                Logger.add("ServerThread_old: Run", ex);
                 break;
             }
             if (socket != null) {
@@ -57,7 +57,7 @@ public class ServerThread extends Thread {
         try {
             bluetoothServerSocket.close();
         } catch (IOException ex) {
-            Logger.add("ServerThread_old: Close BluetoothServerSocket", ex, Log.ERROR);
+            Logger.add("ServerThread_old: Close BluetoothServerSocket", ex);
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.icon.agnks;
+package com.icon.activities;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -17,20 +17,20 @@ import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.icon.agnks.Device;
 import com.icon.bluetooth.BluetoothUtils;
 import com.icon.bluetooth.ClientThread;
 import com.icon.bluetooth.CommunicationThread;
 import com.icon.bluetooth.Communicator;
-import com.icon.utils.Logger;
+import com.icon.agnks.Logger;
 import com.icon.utils.MessageBox;
 import com.icon.utils.Utils;
 
-import java.util.Arrays;
+public class ProgrDeviceActivity extends Activity implements CommunicationThread.CommunicatorService {
 
-public class ProgrDeviceActivity extends Activity {
-
-    public final byte[] TEST_BYTES = Utils.toBytes(0xF0, 0x9E, 0x7B, 0, 0, 0, 0x19, 0xF1);
-    public final static String UUID = "5e354ea0-668a-11e5-a837-0800200c9a66";
+//    public final byte[] TEST_BYTES = Utils.toBytes(0xF0, 0x9E, 0x7B, 0, 0, 0, 0x19, 0xF1);
+//    public final static String UUID = "5e354ea0-668a-11e5-a837-0800200c9a66";
+    public final static String SEPAR = " ";
 
     private BluetoothAdapter bluetoothAdapter;
     private ClientThread clientThread;
@@ -51,55 +51,53 @@ public class ProgrDeviceActivity extends Activity {
             try {
                 clientThread.getCommunicator().write(params[0]);
             } catch (Exception ex) {
-                Logger.add(ex, Log.ERROR);
+                Logger.add(ex);
             }
             return null;
         }
     }
 
-    private final CommunicationThread.CommunicatorService communicatorService = new CommunicationThread.CommunicatorService() {
-        @Override
-        public Communicator createCommunicationThread(BluetoothSocket socket) {
+    @Override
+    public Communicator createCommunicationThread(BluetoothSocket socket) {
 
-            return new CommunicationThread(socket, new CommunicationThread.CommunicationListener() {
+        return new CommunicationThread(socket, new CommunicationThread.CommunicationListener() {
 
-                @Override
-                public void onMessage(final byte[] bytes) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String message = Utils.toString(bytes, ",", Utils.RADIX_HEX);
-                            appendTextData("Принято: " + message);
-                            Logger.add("ProgrDeviceActivity: Received: [" + message + "]", Log.INFO);
-                        }
-                    });
-                }
-            });
-        }
+            @Override
+            public void onMessage(final byte[] bytes) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String message = Utils.toString(bytes, SEPAR, Utils.RADIX_HEX);
+                        appendTextData("Принято: " + message);
+                        Logger.add("ProgrDeviceActivity: Received: [" + message + "]", Log.INFO);
+                    }
+                });
+            }
+        });
+    }
 
-        @Override
-        public void connectToDevice(final BluetoothDevice remoteDevice, final boolean isConnected) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    ProgrDeviceActivity.this.isConnected = isConnected;
-                    buttonSendMessage.setEnabled(isConnected);
-                    String deviceInfo = Utils.getDeviceInfo(remoteDevice);
-                    String strResult = (isConnected) ? " установлено" : " НЕ установлено";
-                    MessageBox.shoter(ProgrDeviceActivity.this, "Соединение с устройством " + deviceInfo + strResult);
-                    String strLogRes = (isConnected) ? "" : "NOT";
-                    Logger.add("ProgrDeviceActivity: ClientThread " + strLogRes + " connected. RemoteDevice info: " + deviceInfo, Log.INFO);
-                    progressBarMain.setVisibility(View.INVISIBLE);
-                    String connState = (isConnected) ? getString(R.string.str_close_connect) : getString(R.string.str_setup_connect);
-                    buttonSetupConnect.setText(connState);
+    @Override
+    public void connectToDevice(final BluetoothDevice remoteDevice, final boolean isConnected) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ProgrDeviceActivity.this.isConnected = isConnected;
+                buttonSendMessage.setEnabled(isConnected);
+                String deviceInfo = Utils.getDeviceInfo(remoteDevice);
+                String strResult = (isConnected) ? " установлено" : " НЕ установлено";
+                MessageBox.shoter(ProgrDeviceActivity.this, "Соединение с устройством " + deviceInfo + strResult);
+                String strLogRes = (isConnected) ? "" : "NOT";
+                Logger.add("ProgrDeviceActivity: ClientThread " + strLogRes + " connected. RemoteDevice info: " + deviceInfo, Log.INFO);
+                progressBarMain.setVisibility(View.INVISIBLE);
+                String connState = (isConnected) ? getString(R.string.str_close_connect) : getString(R.string.str_setup_connect);
+                buttonSetupConnect.setText(connState);
 //                    setButtonsEnabled(true);
-                    buttonSendMessage.setEnabled(true);
-                    buttonSetupConnect.setEnabled(true);
-                    editText.setEnabled(true);
-                }
-            });
-        }
-    };
+                buttonSendMessage.setEnabled(true);
+                buttonSetupConnect.setEnabled(true);
+                editText.setEnabled(true);
+            }
+        });
+    }
 
     /*
     *
@@ -121,7 +119,7 @@ public class ProgrDeviceActivity extends Activity {
         try {
             bluetoothAdapter = BluetoothUtils.getAdapter(this);
         } catch(Exception ex) {
-            Logger.add("ProgrDeviceActivity: Create BluetoothAdapter", ex, Log.ERROR);
+            Logger.add("ProgrDeviceActivity: Create BluetoothAdapter", ex);
         } finally {
             if (bluetoothAdapter == null) {
                 MessageBox.shoter(this, "Не найден Bluetooth адаптер на устройстве");
@@ -183,7 +181,7 @@ public class ProgrDeviceActivity extends Activity {
     *
     */
     public void createClient(BluetoothDevice remoteDevice) {
-        clientThread = new ClientThread(remoteDevice, communicatorService, bluetoothAdapter, false);
+        clientThread = new ClientThread(remoteDevice, this, bluetoothAdapter, false);
         clientThread.start();
 
         progressBarMain.setVisibility(ProgressBar.VISIBLE);
@@ -240,13 +238,13 @@ public class ProgrDeviceActivity extends Activity {
 //
             byte[] bytes = null;
             try {
-                bytes = Utils.stringToBytes(str, ",", radix);
+                bytes = Utils.stringToBytes(str, SEPAR, radix);
             } catch(Exception ex) {
                 MessageBox.shoter(this, "Не удается распарсить данные");
             }
             if (bytes != null) {
                 new WriteTask().execute(bytes);
-                appendTextData("Отправлено: " + Utils.toString(bytes, ",", radix));
+                appendTextData("Отправлено: " + Utils.toString(bytes, SEPAR, radix));
             }
 
 //            Toast.makeText(this, "Сообщение [" + str + "] отправлено", Toast.LENGTH_SHORT).show();

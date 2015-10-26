@@ -1,4 +1,4 @@
-package com.icon.agnks;
+package com.icon.activities;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,6 +9,8 @@ import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.icon.agnks.Device;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +34,8 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
     private ListView listView;
     private final List<Device> list;
     private final List<Device> dbDevices;
-    private int discoveredDevicesCount = 0;
+//    private final List<Device> newDevices;
+//    private int discoveredDevicesCount = 0;
     private DevicesListener devicesListener;
 
     /*
@@ -63,23 +66,32 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
         this.listView = listView;
         this.list = new ArrayList<>();
         this.dbDevices = new ArrayList<>();
+
+//        this.newDevices = new ArrayList<>();
+
         this.devicesListener = devicesListener;
         reinit(devices, false);
     }
 
 
     public void reinit(List<Device> devices, boolean isNeedNotify) {
-        this.discoveredDevicesCount = 0;
+        List<Device> toAdd = new ArrayList<>(devices);
+
+//        this.discoveredDevicesCount = 0;
 
         this.list.clear();
-        this.list.addAll(devices);
+        this.list.addAll(toAdd);
 
-        dbDevices.clear();
-        for (Device device : devices) {
+        this.dbDevices.clear();
+
+//        this.newDevices.clear();
+
+        for (Device device : toAdd) {
             if (device.IsSaved)
-                dbDevices.add(device);
-            else
-                this.discoveredDevicesCount++;
+                this.dbDevices.add(device);
+//            else
+//                this.newDevices.add(device);
+//                this.discoveredDevicesCount++;
         }
 
         if (isNeedNotify) notifyDataSetChanged();
@@ -256,27 +268,44 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
     public void setFoundedToDBDevices(Device device) {
 
         int oldPosition = getPosition(device);
-        Device exist = getItem(oldPosition);
+        if (oldPosition >= 0) {
+            Device exist = getItem(oldPosition);
 
-        device = exist;
-        device.IsSaved = true;
-        device.State = Device.STATE_ONLINE;
+//            device = new Device(exist);
+            exist.DeviceName = device.DeviceName;
+            exist.IsSaved = true;
+            exist.State = Device.STATE_ONLINE;
 
-        if (discoveredDevicesCount > 1 && oldPosition > 0 && oldPosition < discoveredDevicesCount) {
-            list.remove(oldPosition);
-            discoveredDevicesCount--;
-            int newPosition = discoveredDevicesCount;
-            list.add(newPosition, device);
-        } else  updateWithoutNotify(oldPosition, device);
+//            if (discoveredDevicesCount > 1 && oldPosition < discoveredDevicesCount) {
+                // replace to new position
+//                list.remove(oldPosition);
+//                discoveredDevicesCount--;
+//                int newPosition = discoveredDevicesCount;
+//                // add to new position
+//                list.add(newPosition, device);
+//            }
+//            else
+//            discoveredDevicesCount--;
 
-        notifyDataSetChanged();
+            // add to database devices
+            if (!dbDevices.contains(exist)) dbDevices.add(exist);
+            /*if (newDevices.contains(exist)) */
+//            newDevices.remove(exist);
+
+//            updateWithoutNotify(oldPosition, device);
+//            notifyDataSetChanged();
+            update(oldPosition, exist);
+        }
     }
 
     private void addFoundedLikeNewDevice(Device device) {
         device.IsSaved = false;
         device.State = Device.STATE_ONLINE;
-        discoveredDevicesCount++;
+//        discoveredDevicesCount++;
         list.add(device);
+
+//        newDevices.add(device);
+
         notifyDataSetChanged();
     }
 
@@ -296,6 +325,11 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
         notifyDataSetChanged();
     }
 
+    public void update(int index, Device device) {
+        list.set(index, device);
+        notifyDataSetChanged();
+    }
+
     public void updateWithoutNotify(Device device) {
         int index = getPosition(device);
         list.set(index, device);
@@ -306,8 +340,11 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
     }
 
     public void delete(Device device) {
-        int index = getPosition(device);
-        list.remove(index);
+//        int index = getPosition(device);
+        list.remove(device);
+
+        dbDevices.remove(device);
+
         notifyDataSetChanged();
     }
 
@@ -315,7 +352,7 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
         return list;
     }
 
-    public int getDiscoveredCount() {
-        return discoveredDevicesCount;
-    }
+//    public int getDiscoveredCount() {
+//        return discoveredDevicesCount;
+//    }
 }

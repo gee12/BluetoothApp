@@ -1,7 +1,10 @@
-package com.icon.utils;
+package com.icon.agnks;
 
 import android.os.Environment;
 import android.util.Log;
+
+import com.icon.utils.FileUtils;
+import com.icon.utils.Utils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -59,6 +62,13 @@ public class Logger {
         isInit = true;
     }
 
+    /**
+     * Initialized
+     * @param logDir
+     * @param cacheDir
+     * @param logFileName
+     * @return
+     */
     private static File initLogFile(String logDir, String cacheDir, String logFileName) {
         File file = null;
         String sdState = Environment.getExternalStorageState();
@@ -98,6 +108,11 @@ public class Logger {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Запись пользовательского и системного лога (если требуется)
+     * @param message
+     * @param isNeedSystemLog
+     */
     public static void add(String message, int type, boolean isNeedSystemLog) {
         if (isNeedLog() && isLevelSuit(type)) {
             String strType = systemlog(message, type, isNeedSystemLog);
@@ -105,22 +120,38 @@ public class Logger {
         }
     }
 
-    public static void add(Exception ex, int type, boolean isNeedSystemLog) {
-        if (isNeedLog() && isLevelSuit(type)) {
+    /**
+     * Запись пользовательского и системного лога (если требуется) об ошибке
+     * @param ex
+     * @param isNeedSystemLog
+     */
+    public static void add(Exception ex, boolean isNeedSystemLog) {
+        if (isNeedLog() && isLevelSuit(ERROR)) {
             String message = ex.getMessage();
-            String strType = systemlog(message, ex, type, isNeedSystemLog);
+            String strType = systemlog(message, ex, isNeedSystemLog);
             write(strType, message);
         }
     }
 
-    public static void add(String message, Exception ex, int type, boolean isNeedSystemLog) {
-        if (isNeedLog() && isLevelSuit(type)) {
+    /**
+     * Запись пользовательского и системного лога (если требуется) об ошибке с добавлением сообщения
+     * @param message
+     * @param ex
+     * @param isNeedSystemLog
+     */
+    public static void add(String message, Exception ex, boolean isNeedSystemLog) {
+        if (isNeedLog() && isLevelSuit(ERROR)) {
             String allMessage = message + "\n" + ex.getMessage();
-            String strType = systemlog(allMessage, ex, type, isNeedSystemLog);
+            String strType = systemlog(allMessage, ex, isNeedSystemLog);
             write(strType, allMessage);
         }
     }
 
+    /**
+     * Запись пользовательского и системного лога
+     * @param message
+     * @param type
+     */
     public static void add(String message, int type) {
         if (isNeedLog() && isLevelSuit(type)) {
             String strType = systemlog(message, type, true);
@@ -128,18 +159,27 @@ public class Logger {
         }
     }
 
-    public static void add(Exception ex, int type) {
-        if (isNeedLog() && isLevelSuit(type)) {
+    /**
+     * Запись пользовательского и системного лога об ошибке
+     * @param ex
+     */
+    public static void add(Exception ex) {
+        if (isNeedLog() && isLevelSuit(ERROR)) {
             String message = ex.getMessage();
-            String strType = systemlog(message, ex, type, true);
+            String strType = systemlog(message, ex, true);
             write(strType, message);
         }
     }
 
-    public static void add(String message, Exception ex, int type) {
-        if (isNeedLog() && isLevelSuit(type)) {
+    /**
+     * Запись пользовательского и системного лога об ошибке с добавлением сообщения
+     * @param message
+     * @param ex
+     */
+    public static void add(String message, Exception ex) {
+        if (isNeedLog() && isLevelSuit(ERROR)) {
             String allMessage = message + "\n" + ex.getMessage();
-            String strType = systemlog(allMessage, ex, type, true);
+            String strType = systemlog(allMessage, ex, true);
             write(strType, allMessage);
         }
     }
@@ -152,6 +192,13 @@ public class Logger {
         }
     }
 
+    /**
+     * Get log type String and write system log if need
+     * @param message
+     * @param type
+     * @param isNeedWriteLog
+     * @return
+     */
     public static String systemlog(String message, int type, boolean isNeedWriteLog) {
         switch(type) {
             case DEBUG:
@@ -176,28 +223,16 @@ public class Logger {
         return "NONE";
     }
 
-    public static String systemlog(String message, Exception ex, int type, boolean isNeedWriteLog) {
-        switch(type) {
-            case DEBUG:
-                if (isNeedWriteLog) Log.d(Tag, message, ex);
-                return "DEBUG";
-            case VERBOSE:
-                if (isNeedWriteLog) Log.v(Tag, message, ex);
-                return "VERBOSE";
-            case INFO:
-                if (isNeedWriteLog) Log.i(Tag, message, ex);
-                return "INFO";
-            case WARN:
-                if (isNeedWriteLog) Log.w(Tag, message, ex);
-                return "WARN";
-            case ERROR:
-                if (isNeedWriteLog) Log.e(Tag, message);
-                return "ERROR";
-            case UNCAUGHT:
-                if (isNeedWriteLog) Log.e(Tag, message);
-                return "UNCAUGHT";
-        }
-        return "NONE";
+    /**
+     * Получение строкового наименования типа лога, и запись системного лога (если требуется)
+     * @param message
+     * @param ex
+     * @param isNeedWriteLog
+     * @return
+     */
+    public static String systemlog(String message, Exception ex, boolean isNeedWriteLog) {
+        if (isNeedWriteLog) Log.e(Tag, message, ex);
+        return systemlog(message, ERROR, false);
     }
 
     public static void systemlog(String message, Exception ex) {
@@ -208,13 +243,19 @@ public class Logger {
         Log.e(Tag, ex.getLocalizedMessage(), ex);
     }
 
-    /*
-    *
-    */
+    /**
+     * Запись пользовательского лог-файла
+     * @param type
+     * @param message
+     */
     public static void write(String type, String message) {
         write(type + ": " + /*ReflectiveUtils.getLocation() +*/ message);
     }
 
+    /**
+     * Запись пользовательского лог-файла
+     * @param message
+     */
     public static void write(String message) {
         if (LogFile == null) {
             LogFile = defaultInitLogFile();
@@ -224,7 +265,7 @@ public class Logger {
                 LogFile.getParentFile().mkdirs();
                 LogFile.createNewFile();
             }
-            //
+            // обрезаем лог-файл, если размер в кБ > LogFileMaxSize
             int lineNum = cutIfMore(LogFile, LogFileMaxSize*1024, LogFileMaxEndLines);
 
             FileWriter f = new FileWriter(LogFile, true);
@@ -251,9 +292,10 @@ public class Logger {
         return 0;
     }
 
-    /*
-    *
-    */
+    /**
+     * Чтение пользовательского лог-файла
+     * @return
+     */
     public static String readLogs() {
         if (!LogFile.exists()) {
             return "Лог-файл отсутствует..";
@@ -276,9 +318,9 @@ public class Logger {
         return "";
     }
 
-    /*
-    *
-    */
+    /**
+     * Очистка пользовательского лог-файла
+     */
     public static void clearLogs() {
         if (!LogFile.exists()) {
             return;

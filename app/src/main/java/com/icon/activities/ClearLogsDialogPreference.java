@@ -1,11 +1,17 @@
-package com.icon.utils;
+package com.icon.activities;
+
+/**
+ * Created by Ivan on 26.10.2015.
+ */
 
 import android.content.Context;
 import android.preference.DialogPreference;
 import android.util.AttributeSet;
 
+import com.icon.agnks.Logger;
+
 /**
- * Created by Ivan on 19.10.2015.
+ * Диалог очистки лог-файла (используется в pref_log.xml)
  */
 public class ClearLogsDialogPreference extends DialogPreference {
     public ClearLogsDialogPreference(Context context, AttributeSet attrs) {
@@ -17,13 +23,10 @@ public class ClearLogsDialogPreference extends DialogPreference {
         super.onDialogClosed(positiveResult);
 
         if (positiveResult) {
+
+            // очищаем лог-файл
             Logger.clearLogs();
             notifyChanged();
         }
     }
-
-//    @Override
-//    public CharSequence getSummary() {
-//        return "Логи очищены";
-//    }
 }

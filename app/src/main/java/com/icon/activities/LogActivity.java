@@ -1,10 +1,10 @@
-package com.icon.agnks;
+package com.icon.activities;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-import com.icon.utils.Logger;
+import com.icon.agnks.Logger;
 
 /**
  * Created by Ivan on 09.10.2015.

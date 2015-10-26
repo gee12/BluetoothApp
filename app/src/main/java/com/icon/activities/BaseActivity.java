@@ -1,4 +1,4 @@
-package com.icon.agnks;
+package com.icon.activities;
 
 import android.app.Activity;
 import android.content.Context;
@@ -7,10 +7,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.icon.utils.Access;
-import com.icon.utils.CustomExceptionHandler;
-import com.icon.utils.Global;
-import com.icon.utils.Logger;
+import com.icon.agnks.Access;
 
 import com.icon.bluetooth.TestActivity;
 

@@ -1,4 +1,4 @@
-package com.icon.db;
+package com.icon.agnks;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -7,9 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
-
-import com.icon.agnks.Device;
-import com.icon.utils.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +34,17 @@ public class DBHelper extends SQLiteOpenHelper {
 //            + COLUMN_STATE + " integer);";
     private static final String DB_DROP_SCRIPT = "DROP TABLE IF EXISTS " + DB_DEVICES_TABLE;
 
+    public static List<Device> DbDevices = new ArrayList<>();
+
+    public static void init(Context context) {
+        DBHelper db = new DBHelper(context);
+        DbDevices = db.getAllToList();
+    }
+
+    /**
+     *
+     * @param context
+     */
     public DBHelper(Context context) {
         this(context, DB_NAME, null, DB_VERSION);
     }

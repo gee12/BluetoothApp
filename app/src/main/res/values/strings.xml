@@ -10,7 +10,7 @@
     <string name="str_discover_devices">Найти устройства</string>
     <string name="str_stop_discover_devices">Остановить поиск</string>
     <string name="str_prompt_enter_message">Текст сообщения:</string>
-    <string name="str_data">Данные (разделитель чисел: \' , \' ):</string>
+    <string name="str_data">Данные (разделитель чисел - пробел):</string>
     <string name="str_setup_connect">Установить соединение</string>
     <string name="str_close_connect">Закрыть соединение</string>
     <string name="str_send_message">Отправить сообщение</string>

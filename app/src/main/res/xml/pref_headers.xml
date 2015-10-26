@@ -8,13 +8,13 @@
     <!--</header>-->
 
     <header
-        android:fragment="com.icon.agnks.SettingsActivity$PrefsFragment"
+        android:fragment="com.icon.activities.SettingsActivity$PrefsFragment"
         android:title="@string/pref_header_access" >
         <extra android:name="pref-resource" android:value="pref_access" />
     </header>
 
     <header
-        android:fragment="com.icon.agnks.SettingsActivity$PrefsFragment"
+        android:fragment="com.icon.activities.SettingsActivity$PrefsFragment"
         android:title="@string/pref_header_bluetooth" >
         <extra android:name="pref-resource" android:value="pref_bluetooth" />
     </header>

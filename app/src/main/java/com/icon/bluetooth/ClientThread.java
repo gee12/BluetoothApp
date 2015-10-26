@@ -5,7 +5,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.icon.utils.Logger;
+import com.icon.agnks.Logger;
 import com.icon.utils.Utils;
 
 import java.io.IOException;
@@ -45,7 +45,7 @@ public class ClientThread extends Thread {
             tmp = (BluetoothSocket) m.invoke(remoteDevice, 1);
 
         } catch (Exception ex) {
-            Logger.add("ClientThread: Creating BluetoothSocket", ex, Log.ERROR);
+            Logger.add("ClientThread: Creating BluetoothSocket", ex);
         }
         socket = tmp;
 
@@ -85,7 +85,7 @@ public class ClientThread extends Thread {
             isConnected = true;
 
         } catch (Exception connectException) {
-            Logger.add("ClientThread: Run exception. INFO: " + connectException.getLocalizedMessage(), connectException, Log.ERROR);
+            Logger.add("ClientThread: Run exception. INFO: " + connectException.getLocalizedMessage(), connectException);
 
             closeSocket();
         } finally {
@@ -108,7 +108,7 @@ public class ClientThread extends Thread {
         try {
             socket.close();
         } catch (IOException ex) {
-            Logger.add("ClientThread: Close BluetoothSocket", ex, Log.ERROR);
+            Logger.add("ClientThread: Close BluetoothSocket", ex);
         }
     }
 }

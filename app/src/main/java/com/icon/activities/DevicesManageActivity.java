@@ -1,4 +1,4 @@
-package com.icon.agnks;
+package com.icon.activities;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -13,9 +13,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
+import com.icon.agnks.Device;
 import com.icon.bluetooth.BluetoothUtils;
-import com.icon.db.DBHelper;
-import com.icon.utils.Logger;
+import com.icon.agnks.DBHelper;
+import com.icon.agnks.Logger;
 import com.icon.utils.MessageBox;
 
 import java.util.ArrayList;
@@ -26,7 +27,6 @@ public class DevicesManageActivity extends BaseListActivity {
     public final static int REQUEST_ENABLE_BT = 1;
     public final static int REQUEST_ADD_DEVICE = 2;
     public final static int REQUEST_EDIT_DEVICE = 3;
-//    public final static int REQUEST_DELETE_DEVICE = 4;
     public final static String PARSEL_TAG_DEVICES = "PARSEL_TAG_DEVICES";
 
     private BluetoothAdapter bluetoothAdapter;
@@ -40,18 +40,19 @@ public class DevicesManageActivity extends BaseListActivity {
     private DBHelper dbHelper;
     private Device currentDevice;
 
-    /*
-    *
-    */
-    public class DialogClickListener implements DialogInterface.OnClickListener {
+    /**
+     *
+     */
+    public class DeleteDeviceDialogListener implements DialogInterface.OnClickListener {
         Device device;
-        public DialogClickListener(Device device) {
+        public DeleteDeviceDialogListener(Device device) {
             this.device = device;
         }
         @Override
         public void onClick(DialogInterface dialog, int which) {
             switch (which){
                 case DialogInterface.BUTTON_POSITIVE:
+                    // delete
                     deleteDevice(device);
                 default:
                     dialog.dismiss();
@@ -59,9 +60,10 @@ public class DevicesManageActivity extends BaseListActivity {
         }
     }
 
-    /*
-    *
-    */
+    /**
+     *
+     * @param savedInstanceState
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,8 +71,6 @@ public class DevicesManageActivity extends BaseListActivity {
 
         buttonDiscovery = (Button) findViewById(R.id.discovery_button);
         progressBar = (ProgressBar) findViewById(R.id.progressBarList);
-
-//        if (savedInstanceState != null) return;
 
         //
         DevicesArrayAdapter.DevicesListener devicesListener = new DevicesArrayAdapter.DevicesListener() {
@@ -98,7 +98,7 @@ public class DevicesManageActivity extends BaseListActivity {
 
             @Override
             public void onDelete(Device device) {
-                MessageBox.yesNoDialog(DevicesManageActivity.this, new DialogClickListener(device), "Удалить устройство из базы данных?");
+                MessageBox.yesNoDialog(DevicesManageActivity.this, new DeleteDeviceDialogListener(device), "Удалить устройство из базы данных?");
             }
 
             @Override
@@ -129,7 +129,7 @@ public class DevicesManageActivity extends BaseListActivity {
             bluetoothAdapter = BluetoothUtils.getAdapter(this);
             listAdapter = new DevicesArrayAdapter(this, getListView(), devices, devicesListener);
         } catch(Exception ex) {
-            Logger.add(ex, Log.ERROR);
+            Logger.add(ex);
         }
         setListAdapter(listAdapter);
     }
@@ -142,9 +142,10 @@ public class DevicesManageActivity extends BaseListActivity {
         super.onSaveInstanceState(outState);
     }
 
-    /*
-        *
-         */
+    /**
+     *
+     * @param view
+     */
     public void discoverDevices(View view) {
 
         if (bluetoothAdapter == null) {
@@ -176,7 +177,7 @@ public class DevicesManageActivity extends BaseListActivity {
                             listAdapter.addFoundedDevice(device);
                         }
                     } catch(Exception ex) {
-                        Logger.add("DevicesManageActivity.discoverDevices(): BroadcastReceiver.onReceive(): ", ex, Logger.ERROR);
+                        Logger.add("DevicesManageActivity.discoverDevices(): BroadcastReceiver.onReceive(): ", ex);
                     }
                 }
             };
@@ -197,8 +198,9 @@ public class DevicesManageActivity extends BaseListActivity {
         bluetoothAdapter.startDiscovery();
     }
 
-    /*
-    *
+    /**
+     *
+     * @param isAtWork
      */
     private void setDiscoveryState(boolean isAtWork) {
         isDiscoveryAtWork = isAtWork;
@@ -217,9 +219,12 @@ public class DevicesManageActivity extends BaseListActivity {
         getListView().setEnabled(!isAtWork);
     }
 
-    /*
-    *
-    */
+    /**
+     *
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_ENABLE_BT) {
@@ -245,6 +250,7 @@ public class DevicesManageActivity extends BaseListActivity {
     private void addDevice(Device device) {
         long res = (device != null) ? dbHelper.insert(device) : -1;
         if (res > -1) {
+            device.Id = res;
             listAdapter.setFoundedToDBDevices(device);
         } else {
             MessageBox.shoter(this, "Не удается добавить устройство в базу данных");
@@ -252,8 +258,8 @@ public class DevicesManageActivity extends BaseListActivity {
     }
 
     private void updateDevice(Device device) {
-        int res = (device != null) ? dbHelper.update(device) : -1;
-        if (res > -1) {
+        int res = (device != null) ? dbHelper.update(device) : 0;
+        if (res > 0) {
             listAdapter.update(device);
         } else {
             MessageBox.shoter(this, "Не удается редактировать устройство в базе данных");
@@ -261,15 +267,16 @@ public class DevicesManageActivity extends BaseListActivity {
     }
 
     private void deleteDevice(Device device) {
-        if (dbHelper.delete(device) > -1) {
+        int res = (device != null) ? dbHelper.delete(device) : 0;
+        if (res > 0) {
             listAdapter.delete(device);
         } else {
             MessageBox.shoter(DevicesManageActivity.this, "Не удается удалить устройство из базы данных");
         }
     }
 
-    /*
-    *
+    /**
+     *
      */
     public void unregisterReceivers() {
         if (discoverDevicesReceiver != null) {

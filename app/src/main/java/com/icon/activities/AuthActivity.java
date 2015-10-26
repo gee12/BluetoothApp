@@ -1,4 +1,4 @@
-package com.icon.agnks;
+package com.icon.activities;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,10 +7,11 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.icon.utils.Access;
+import com.icon.agnks.Access;
+import com.icon.agnks.Settings;
 import com.icon.utils.CustomExceptionHandler;
 import com.icon.utils.Global;
-import com.icon.utils.Logger;
+import com.icon.agnks.Logger;
 import com.icon.utils.MessageBox;
 
 /**
@@ -56,17 +57,17 @@ public class AuthActivity extends Activity {
             Logger.initCacheDir(getBaseContext().getCacheDir().getAbsolutePath());
             Logger.setLevel(Logger.ERROR | Logger.DEBUG | Logger.INFO | Logger.UNCAUGHT);
 
-            Logger.IsNeedLog = SettingsActivity.getPref(getString(R.string.pref_key_is_need_log), true);
-            Logger.LogFileMaxSize = SettingsActivity.getPref(getString(R.string.pref_key_log_max_size), Logger.LogFileMaxSize);
-            Logger.LogFileMaxEndLines = SettingsActivity.getPref(getString(R.string.pref_key_log_last_lines), Logger.LogFileMaxEndLines);
+            Logger.IsNeedLog = Settings.getPref(getString(R.string.pref_key_is_need_log), true);
+            Logger.LogFileMaxSize = Settings.getPref(getString(R.string.pref_key_log_max_size), Logger.LogFileMaxSize);
+            Logger.LogFileMaxEndLines = Settings.getPref(getString(R.string.pref_key_log_last_lines), Logger.LogFileMaxEndLines);
 
             String start = String.format("Старт 'АГНКС'. AppId: [%s], Версия: [%s]", BuildConfig.APPLICATION_ID, BuildConfig.VERSION_NAME);
             Logger.add(start, Logger.INFO);
         }
 
         // access
-        Access.UserPass = SettingsActivity.getPref(getString(R.string.pref_key_user_pass), Access.UserPass);
-        Access.AdminPass = SettingsActivity.getPref(getString(R.string.pref_key_admin_pass), Access.AdminPass);
+        Access.UserPass = Settings.getPref(getString(R.string.pref_key_user_pass), Access.UserPass);
+        Access.AdminPass = Settings.getPref(getString(R.string.pref_key_admin_pass), Access.AdminPass);
     }
 
     /**

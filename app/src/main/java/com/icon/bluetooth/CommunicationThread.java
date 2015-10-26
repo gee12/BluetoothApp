@@ -4,7 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import com.icon.utils.Logger;
+import com.icon.agnks.Logger;
 import com.icon.utils.Utils;
 
 import java.io.IOException;
@@ -38,7 +38,7 @@ public class CommunicationThread extends Thread implements Communicator {
             tmpIn = socket.getInputStream();
             tmpOut = socket.getOutputStream();
         } catch (IOException ex) {
-            Logger.add("CommunicationThread: Create InputStream,OutputStream", ex, Log.ERROR);
+            Logger.add("CommunicationThread: Create InputStream,OutputStream", ex);
         }
         inputStream = tmpIn;
         outputStream = tmpOut;
@@ -66,7 +66,7 @@ public class CommunicationThread extends Thread implements Communicator {
                 listener.onMessage(Arrays.copyOfRange(buffer, 0, bytes));
 
             } catch (IOException ex) {
-                Logger.add("CommunicationThread: Run the communicator", ex, Log.ERROR);
+                Logger.add("CommunicationThread: Run the communicator", ex);
                 break;
             }
         }
@@ -77,7 +77,7 @@ public class CommunicationThread extends Thread implements Communicator {
             Logger.add("CommunicationThread: Write: [" + Utils.toString(bytes, ",", Utils.RADIX_HEX) + "]", Log.DEBUG);
             outputStream.write(bytes);
         } catch (IOException ex) {
-            Logger.add("CommunicationThread: Write to OutputStream", ex, Log.ERROR);
+            Logger.add("CommunicationThread: Write to OutputStream", ex);
         }
     }
 
@@ -86,7 +86,7 @@ public class CommunicationThread extends Thread implements Communicator {
         try {
             socket.close();
         } catch (IOException ex) {
-            Logger.add("CommunicationThread: Close BluetoothSocket", ex, Log.ERROR);
+            Logger.add("CommunicationThread: Close BluetoothSocket", ex);
         }
     }
 

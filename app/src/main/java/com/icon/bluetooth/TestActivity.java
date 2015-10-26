@@ -2,7 +2,6 @@ package com.icon.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -21,9 +20,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.icon.agnks.BaseListActivity;
-import com.icon.agnks.R;
-import com.icon.utils.Logger;
+import com.icon.activities.BaseListActivity;
+import com.icon.activities.R;
+import com.icon.agnks.Logger;
 import com.icon.utils.MessageBox;
 import com.icon.utils.Utils;
 
@@ -43,7 +42,7 @@ public class TestActivity extends BaseListActivity {
             try {
                 clientThread.getCommunicator().write(params[0]);
             } catch (Exception ex) {
-                Logger.add(ex, Log.ERROR);
+                Logger.add(ex);
             }
             return null;
         }
@@ -129,7 +128,7 @@ public class TestActivity extends BaseListActivity {
                 }
             };
         } catch(Exception ex) {
-            Logger.add(ex, Log.ERROR);
+            Logger.add(ex);
         }
         setListAdapter(listAdapter);
     }

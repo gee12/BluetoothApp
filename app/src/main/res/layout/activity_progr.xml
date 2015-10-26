@@ -49,7 +49,7 @@
             android:layout_margin="5dp"
             android:gravity="top|left"
             android:hint="@string/str_data_hint"
-            android:digits="0123456789ABCDEF,abcdef"
+            android:digits="0123456789ABCDEFabcdef "
             android:inputType="textCapCharacters"
             android:lines="2" />
 
