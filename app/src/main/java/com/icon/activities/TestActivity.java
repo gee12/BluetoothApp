@@ -1,8 +1,7 @@
-package com.icon.bluetooth;
+package com.icon.activities;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,16 +19,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.icon.activities.BaseListActivity;
-import com.icon.activities.R;
+import com.icon.agnks.Bluetooth;
 import com.icon.agnks.Logger;
+import com.icon.bluetooth.ClientThread;
+import com.icon.bluetooth.CommunicationThread;
 import com.icon.utils.MessageBox;
 import com.icon.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestActivity extends BaseListActivity {
+public class TestActivity extends BaseListActivity implements ClientThread.ClientListener, CommunicationThread.CommunicationListener {
 
     public final byte[] TEST_BYTES = Utils.toBytes(0xF0, 0x9E, 0x7B, 0, 0, 0, 0x19, 0xF1);
 
@@ -40,7 +40,8 @@ public class TestActivity extends BaseListActivity {
         @Override
         protected Void doInBackground(byte[]... params) {
             try {
-                clientThread.getCommunicator().write(params[0]);
+//                clientThread.getCommunicator().write(params[0]);
+                clientThread.sendBytes(params[0]);
             } catch (Exception ex) {
                 Logger.add(ex);
             }
@@ -63,28 +64,33 @@ public class TestActivity extends BaseListActivity {
     private ProgressBar progressBarMain;
     private boolean isDiscoveryAtWork;
 
-    private final CommunicationThread.CommunicatorService communicatorService = new CommunicationThread.CommunicatorService() {
+//    private final CommunicationThread.CommunicationListener communicationListener = new CommunicationThread.CommunicationListener() {
+//        @Override
+//        public Communicator createCommunicationThread(BluetoothSocket socket) {
+//
+//            return new CommunicationThread(socket, new CommunicationThread.CommunicationListener() {
+
+    @Override
+    public void onMessage(final byte[] bytes) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String message = Utils.toString(bytes, ",", Utils.RADIX_HEX);
+                appendTextData("Принято: " + message);
+                Logger.add("TestActivity: Message received: " + message, Log.INFO);
+            }
+        });
+    }
+
+    @Override
+    public void responceTimeElapsed() {
+
+    }
+//            });
+//        }
+
         @Override
-        public Communicator createCommunicationThread(BluetoothSocket socket) {
-
-            return new CommunicationThread(socket, new CommunicationThread.CommunicationListener() {
-
-                @Override
-                public void onMessage(final byte[] bytes) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            String message = Utils.toString(bytes, ",", Utils.RADIX_HEX);
-                            appendTextData("Принято: " + message);
-                            Logger.add("TestActivity: Message received: " + message, Log.INFO);
-                        }
-                    });
-                }
-            });
-        }
-
-        @Override
-        public void connectToDevice(final BluetoothDevice remoteDevice, final boolean isConnected) {
+        public void connectionCompleted(final BluetoothDevice remoteDevice, final boolean isConnected) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -99,7 +105,7 @@ public class TestActivity extends BaseListActivity {
                 }
             });
         }
-    };
+//    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -114,7 +120,7 @@ public class TestActivity extends BaseListActivity {
         progressBarMain = (ProgressBar) findViewById(R.id.progressBarMain);
 
         try {
-            bluetoothAdapter = BluetoothUtils.getAdapter(this);
+            bluetoothAdapter = Bluetooth.getAdapter(this);
 
             listAdapter = new ArrayAdapter<BluetoothDevice>(getBaseContext(), android.R.layout.simple_list_item_1, discoveredDevices) {
                 @Override
@@ -214,8 +220,7 @@ public class TestActivity extends BaseListActivity {
     }
 
     public void createClient(BluetoothDevice remoteDevice) {
-        clientThread = new ClientThread(remoteDevice, communicatorService, bluetoothAdapter, false);
-        clientThread.start();
+        clientThread = Bluetooth.createDeviceCommunication(remoteDevice, this, this);
 
         progressBarMain.setVisibility(ProgressBar.VISIBLE);
         setButtonsEnabled(false);

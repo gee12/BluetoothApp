@@ -1,9 +1,9 @@
 package com.icon.bluetooth;
 
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import com.icon.agnks.Bluetooth;
 import com.icon.agnks.Logger;
 import com.icon.utils.Utils;
 
@@ -14,14 +14,9 @@ import java.util.Arrays;
 
 public class CommunicationThread extends Thread implements Communicator {
 
-    public interface CommunicatorService {
-        Communicator createCommunicationThread(BluetoothSocket socket);
-        void connectToDevice(BluetoothDevice remoteDevice, boolean isConnected);
-    }
-
     public interface CommunicationListener {
-//        void onMessage(String message);
         void onMessage(byte[] bytes);
+        void responceTimeElapsed();
     }
 
     private final BluetoothSocket socket;
@@ -47,7 +42,6 @@ public class CommunicationThread extends Thread implements Communicator {
     @Override
     public void startCommunication() {
         if (listener == null) {
-//            throw new IllegalArgumentException("CommunicationThread: CommunicationListener object is null");
             Logger.add("CommunicationThread: CommunicationListener object is null", Log.ERROR, true);
             return;
         }
@@ -55,21 +49,30 @@ public class CommunicationThread extends Thread implements Communicator {
         byte[] buffer = new byte[1024];
         int bytes;
 
-        Logger.add("CommunicationThread: Run the communicator", Log.DEBUG);
+        int responceMsec = Bluetooth.ResponceMsecMax;
+        long startTime = System.currentTimeMillis();
 
-        while (true) {
+//        inputStream.reset();
+
+        while (startTime + responceMsec > System.currentTimeMillis()) {
             try {
-                bytes = inputStream.read(buffer);
-                Logger.add("CommunicationThread: Read " + bytes + " bytes", Log.DEBUG);
+                if (inputStream.available() != 0) {
+                    // read responce
+                    bytes = inputStream.read(buffer);
+                    Logger.add("CommunicationThread: Read " + bytes + " bytes", Log.DEBUG);
 
-//                listener.onMessage(new String(buffer).substring(0, bytes));
-                listener.onMessage(Arrays.copyOfRange(buffer, 0, bytes));
+                    listener.onMessage(Arrays.copyOfRange(buffer, 0, bytes));
 
+                    return;
+                }
             } catch (IOException ex) {
                 Logger.add("CommunicationThread: Run the communicator", ex);
                 break;
             }
         }
+        //
+        listener.responceTimeElapsed();
+        Logger.add("CommunicationThread: Responce time " + responceMsec + " (msec) elapsed", Log.DEBUG);
     }
 
     public void write(byte[] bytes) {
@@ -89,5 +92,4 @@ public class CommunicationThread extends Thread implements Communicator {
             Logger.add("CommunicationThread: Close BluetoothSocket", ex);
         }
     }
-
 }

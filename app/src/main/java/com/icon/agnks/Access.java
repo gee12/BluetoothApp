@@ -43,9 +43,17 @@ public class Access {
         return accessType == ADMIN_TYPE;
     }
 
+    public static boolean isAccessAllowed(int type) {
+        return (type == USER_TYPE || type == ADMIN_TYPE);
+    }
+
     public static String getAccessTypeName(int type) {
         if (type == USER_TYPE) return "Пользователь";
         else if (type == ADMIN_TYPE) return "Администратор";
-        return "Неизвестный тип";
+        return null;
+    }
+
+    public static String getAccessTypeName() {
+        return getAccessTypeName(accessType);
     }
 }

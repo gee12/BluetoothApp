@@ -1,35 +1,31 @@
 package com.icon.activities;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
 import com.icon.agnks.Device;
-import com.icon.bluetooth.BluetoothUtils;
-import com.icon.agnks.DBHelper;
+import com.icon.agnks.Bluetooth;
+import com.icon.agnks.Database;
 import com.icon.agnks.Logger;
 import com.icon.utils.MessageBox;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DevicesManageActivity extends BaseListActivity {
+public class DevicesManageActivity extends BaseListActivity implements Bluetooth.DiscoveryListener {
 
     public final static int REQUEST_ENABLE_BT = 1;
     public final static int REQUEST_ADD_DEVICE = 2;
     public final static int REQUEST_EDIT_DEVICE = 3;
     public final static String PARSEL_TAG_DEVICES = "PARSEL_TAG_DEVICES";
 
-    private BluetoothAdapter bluetoothAdapter;
+//    private BluetoothAdapter bluetoothAdapter;
     private BroadcastReceiver discoverDevicesReceiver;
     private BroadcastReceiver discoveryFinishedReceiver;
 
@@ -37,7 +33,7 @@ public class DevicesManageActivity extends BaseListActivity {
     private Button buttonDiscovery;
     private ProgressBar progressBar;
     private boolean isDiscoveryAtWork;
-    private DBHelper dbHelper;
+//    private Database database;
     private Device currentDevice;
 
     /**
@@ -113,7 +109,7 @@ public class DevicesManageActivity extends BaseListActivity {
         };
 
         //
-        dbHelper = new DBHelper(this);
+//        database = new Database(this);
 
         List<Device> devices = null;
 
@@ -121,12 +117,13 @@ public class DevicesManageActivity extends BaseListActivity {
             devices = savedInstanceState.getParcelableArrayList(PARSEL_TAG_DEVICES);
         }
         else {
-            devices = dbHelper.getAllToList();
+//            devices = database.selectAllToList();
+            devices = Database.getDevices();
         }
 
         //
         try {
-            bluetoothAdapter = BluetoothUtils.getAdapter(this);
+//            bluetoothAdapter = Bluetooth.getAdapter(this);
             listAdapter = new DevicesArrayAdapter(this, getListView(), devices, devicesListener);
         } catch(Exception ex) {
             Logger.add(ex);
@@ -148,54 +145,81 @@ public class DevicesManageActivity extends BaseListActivity {
      */
     public void discoverDevices(View view) {
 
-        if (bluetoothAdapter == null) {
-            MessageBox.shoter(this, "Не найден Bluetooth адаптер на устройстве");
-            finish();
+//        if (bluetoothAdapter == null) {
+//            MessageBox.shoter(this, "Не найден Bluetooth адаптер на устройстве");
+//            finish();
+//            return;
+//        }
+//
+//        if (!bluetoothAdapter.isEnabled()) {
+//            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+//            startActivityForResult(intent, REQUEST_ENABLE_BT);
+//            return;
+//        }
+
+        Bluetooth.enableIfNeed(this, REQUEST_ENABLE_BT);
+        if (!Bluetooth.isEnabled() && Bluetooth.IsAutoEnable) {
+            bluetoothNoRunMessage();
             return;
         }
 
-        if (!bluetoothAdapter.isEnabled()) {
-            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(intent, REQUEST_ENABLE_BT);
-            return;
-        }
+        _discoverDevices();
+    }
+    public void _discoverDevices() {
 
         setDiscoveryState(!isDiscoveryAtWork);
 
         if (!isDiscoveryAtWork) return;
 
         //
-        if (discoverDevicesReceiver == null) {
-            discoverDevicesReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    try {
-                        String action = intent.getAction();
-                        if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                            final BluetoothDevice btDevice = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                            final Device device = new Device(btDevice, Device.STATE_ONLINE);
-                            listAdapter.addFoundedDevice(device);
-                        }
-                    } catch(Exception ex) {
-                        Logger.add("DevicesManageActivity.discoverDevices(): BroadcastReceiver.onReceive(): ", ex);
-                    }
-                }
-            };
-        }
+//        if (discoverDevicesReceiver == null) {
+//            discoverDevicesReceiver = new BroadcastReceiver() {
+//                @Override
+//                public void onReceive(Context context, Intent intent) {
+//                    try {
+//                        String action = intent.getAction();
+//                        if (BluetoothDevice.ACTION_FOUND.equals(action)) {
+//                            final BluetoothDevice btDevice = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+//                            final Device device = new Device(btDevice, Device.STATE_ONLINE);
+//                            listAdapter.addFoundedDevice(device);
+//                        }
+//                    } catch(Exception ex) {
+//                        Logger.add("DevicesManageActivity.discoverDevices(): BroadcastReceiver.onReceive(): ", ex);
+//                    }
+//                }
+//            };
+//        }
+//        //
+//        if (discoveryFinishedReceiver == null) {
+//            discoveryFinishedReceiver = new BroadcastReceiver() {
+//                @Override
+//                public void onReceive(Context context, Intent intent) {
+//                    setDiscoveryState(false);
+//                }
+//            };
+//        }
         //
-        if (discoveryFinishedReceiver == null) {
-            discoveryFinishedReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    setDiscoveryState(false);
-                }
-            };
-        }
-        //
-        registerReceiver(discoverDevicesReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-        registerReceiver(discoveryFinishedReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+//        registerReceiver(discoverDevicesReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+//        registerReceiver(discoveryFinishedReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
+        Bluetooth.registerDiscoveryReceivers(this, this);
 
-        bluetoothAdapter.startDiscovery();
+//        bluetoothAdapter.startDiscovery();
+        Bluetooth.startDiscovery();
+    }
+
+    @Override
+    public void onFounded(BluetoothDevice bluetoothDevice) {
+        final Device device = new Device(bluetoothDevice, Device.STATE_ONLINE);
+        listAdapter.addFoundedDevice(device);
+    }
+
+    @Override
+    public void onFinished() {
+        setDiscoveryState(false);
+    }
+
+    private void bluetoothNoRunMessage() {
+        MessageBox.shoter(this, "Не удается запустить Bluetooth");
     }
 
     /**
@@ -214,7 +238,8 @@ public class DevicesManageActivity extends BaseListActivity {
             MessageBox.shoter(getBaseContext(), "Поиск закончен. Выберите устройство для соединения");
 
             unregisterReceivers();
-            bluetoothAdapter.cancelDiscovery();
+//            bluetoothAdapter.cancelDiscovery();
+            Bluetooth.cancelDiscovery();
         }
         getListView().setEnabled(!isAtWork);
     }
@@ -228,9 +253,10 @@ public class DevicesManageActivity extends BaseListActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_ENABLE_BT) {
-            if (resultCode != RESULT_OK){
-                MessageBox.shoter(this, "Для работы необходимо включить Bluetooth");
-                finish();
+            if (resultCode == RESULT_OK) {
+                _discoverDevices();
+            } else {
+                bluetoothNoRunMessage();
             }
         } else if (requestCode == REQUEST_ADD_DEVICE) {
             if (resultCode == RESULT_OK){
@@ -248,7 +274,7 @@ public class DevicesManageActivity extends BaseListActivity {
     }
 
     private void addDevice(Device device) {
-        long res = (device != null) ? dbHelper.insert(device) : -1;
+        long res = (device != null) ? Database.insert(this, device) : -1;
         if (res > -1) {
             device.Id = res;
             listAdapter.setFoundedToDBDevices(device);
@@ -258,7 +284,7 @@ public class DevicesManageActivity extends BaseListActivity {
     }
 
     private void updateDevice(Device device) {
-        int res = (device != null) ? dbHelper.update(device) : 0;
+        int res = (device != null) ? Database.update(this, device) : 0;
         if (res > 0) {
             listAdapter.update(device);
         } else {
@@ -267,7 +293,7 @@ public class DevicesManageActivity extends BaseListActivity {
     }
 
     private void deleteDevice(Device device) {
-        int res = (device != null) ? dbHelper.delete(device) : 0;
+        int res = (device != null) ? Database.delete(this, device) : 0;
         if (res > 0) {
             listAdapter.delete(device);
         } else {
@@ -279,23 +305,25 @@ public class DevicesManageActivity extends BaseListActivity {
      *
      */
     public void unregisterReceivers() {
-        if (discoverDevicesReceiver != null) {
-            try {
-                unregisterReceiver(discoverDevicesReceiver);
-                discoverDevicesReceiver = null;
-            } catch (Exception e) {
-                Logger.add("DevicesManageActivity: Не удалось отключить ресивер discoverDevicesReceiver", Log.ERROR);
-            }
-        }
-
-        if (discoveryFinishedReceiver != null) {
-            try {
-                unregisterReceiver(discoveryFinishedReceiver);
-                discoveryFinishedReceiver = null;
-            } catch (Exception e) {
-                Logger.add("DevicesManageActivity: Не удалось отключить ресивер discoveryFinishedReceiver", Log.ERROR);
-            }
-        }
+        Bluetooth.unregisterReceiver(this, discoverDevicesReceiver);
+        Bluetooth.unregisterReceiver(this, discoveryFinishedReceiver);
+//        if (discoverDevicesReceiver != null) {
+//            try {
+//                unregisterReceiver(discoverDevicesReceiver);
+//                discoverDevicesReceiver = null;
+//            } catch (Exception e) {
+//                Logger.add("DevicesManageActivity: Не удалось отключить ресивер discoverDevicesReceiver", Log.ERROR);
+//            }
+//        }
+//
+//        if (discoveryFinishedReceiver != null) {
+//            try {
+//                unregisterReceiver(discoveryFinishedReceiver);
+//                discoveryFinishedReceiver = null;
+//            } catch (Exception e) {
+//                Logger.add("DevicesManageActivity: Не удалось отключить ресивер discoveryFinishedReceiver", Log.ERROR);
+//            }
+//        }
     }
 
     /*
@@ -305,8 +333,7 @@ public class DevicesManageActivity extends BaseListActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        if (bluetoothAdapter != null)
-            bluetoothAdapter.cancelDiscovery();
+        Bluetooth.cancelDiscovery();
 
         unregisterReceivers();
     }

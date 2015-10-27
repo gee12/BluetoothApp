@@ -1,10 +1,24 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-
-
     <PreferenceCategory android:title="@string/pref_header_bluetooth">
 
-        <Preference android:title="Параметры Bluetooth">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="@string/pref_key_is_need_bt_auto_enable"
+            android:title="Автоподключение Bluetooth"
+            android:summary="Автоподключение BT при старте приложения и выключение при завершении"/>
+
+        <EditTextPreference
+            android:defaultValue="3000"
+            android:dialogTitle="Время ожидания ответа"
+            android:inputType="number"
+            android:key="@string/pref_key_answer_max_delay"
+            android:maxLength="6"
+            android:summary="Максимальное время ожидания ответа от Bluetooth-устройства (мсек)"
+            android:title="Время ожидания ответа" />
+
+        <Preference android:title="Настройки Bluetooth"
+            android:summary="Системные настройки">
             <intent android:action="android.settings.BLUETOOTH_SETTINGS" />
             <!--<intent android:action="com.android.settings.bluetooth.BluetoothSettings" />-->
         </Preference>

@@ -1,6 +1,7 @@
 package com.icon.activities;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.icon.agnks.Access;
+import com.icon.agnks.Bluetooth;
 import com.icon.agnks.Settings;
 import com.icon.utils.CustomExceptionHandler;
 import com.icon.utils.Global;
@@ -20,11 +22,6 @@ import com.icon.utils.MessageBox;
 public class AuthActivity extends Activity {
     TextView passTextEdit;
 
-    /**
-     *
-     * @param savedInstanceState
-     */
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         // set custom uncaught exception handler
         Thread.setDefaultUncaughtExceptionHandler(new CustomExceptionHandler());
@@ -88,20 +85,50 @@ public class AuthActivity extends Activity {
             MessageBox.shoter(this, "Неверный пароль");
             return;
         }
-        applyAccess(res);
+        if (Access.isAccessAllowed(res)) {
+            Access.setAccessType(res);
+
+            if (initBluetooth()) {
+                toMainActivity();
+            }
+        }
     }
 
     /**
-     *
-     * @param accessType
+     * Инициализируем и включаем Bluetooth
+     * @return
      */
-    private void applyAccess(int accessType) {
-        String accessTypeName = Access.getAccessTypeName(accessType);
+    private boolean initBluetooth() {
+        if (!Bluetooth.init(this)) {
+            MessageBox.shoter(this, "Не удается найти устройство Bluetooth");
+            return false;
+        }
+
+        Bluetooth.enableIfNeed(this, DevicesManageActivity.REQUEST_ENABLE_BT);
+        return Bluetooth.isEnabled();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == DevicesManageActivity.REQUEST_ENABLE_BT) {
+            if (resultCode == RESULT_OK) {
+                toMainActivity();
+            } else {
+                MessageBox.shoter(this, "Для работы приложения необходимо включить Bluetooth");
+//                finish();
+            }
+        }
+    }
+
+    /**
+     * Переходим на главную активность
+     */
+    private void toMainActivity() {
+        String accessTypeName = Access.getAccessTypeName();
         MessageBox.shoter(this, "Учетная запись: " + accessTypeName);
         Logger.add("Вход под учетной записью: " + accessTypeName, Logger.INFO);
-        Access.setAccessType(accessType);
 
-        Intent intent = new Intent(this, BaseActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
     }

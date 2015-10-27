@@ -9,22 +9,11 @@ import android.view.MenuItem;
 
 import com.icon.agnks.Access;
 
-import com.icon.bluetooth.TestActivity;
-
 public class BaseActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_base);
-//        Button button = (Button)findViewById(R.id.button_in_base);
-//        button.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                final TextView textView = (TextView)findViewById(R.id.textView1);
-//                textView.setText(String.valueOf(Logger.LogFileMaxSize));
-//            }
-//        });
     }
 
     @Override
@@ -33,7 +22,7 @@ public class BaseActivity extends Activity {
     }
 
     /**
-     * Check access
+     * Проверяем уровень доступа и создаем пункты меню
      * @param activity
      * @param menu
      * @return
@@ -56,6 +45,11 @@ public class BaseActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Обработчик пунктов меню
+     * @param context
+     * @param menuItemId
+     */
     public static void onMenuItemSelected(Context context, int menuItemId)
     {
         switch(menuItemId) {

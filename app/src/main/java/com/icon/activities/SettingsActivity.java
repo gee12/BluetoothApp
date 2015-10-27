@@ -5,15 +5,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.preference.DialogPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
-import android.util.AttributeSet;
 
 import com.icon.agnks.Access;
+import com.icon.agnks.Bluetooth;
 import com.icon.agnks.Logger;
 
 import java.lang.reflect.InvocationTargetException;
@@ -127,6 +126,8 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         String lastLinesKey = getString(R.string.pref_key_is_need_log);
         String userPassKey = getString(R.string.pref_key_user_pass);
         String adminPassKey = getString(R.string.pref_key_admin_pass);
+        String btAutoEnableKey = getString(R.string.pref_key_is_need_bt_auto_enable);
+        String btAnswerDelayKey = getString(R.string.pref_key_answer_max_delay);
         if (key.equals(isNeedLogKey)) {
             Logger.IsNeedLog = sharedPreferences.getBoolean(isNeedLogKey, true);
         } else if (key.equals(maxSizeKey)) {
@@ -137,6 +138,10 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
             Access.UserPass = sharedPreferences.getString(userPassKey, Access.UserPass);
         } else if (key.equals(adminPassKey)) {
             Access.AdminPass = sharedPreferences.getString(adminPassKey, Access.AdminPass);
+        } else if (key.equals(btAutoEnableKey)) {
+            Bluetooth.IsAutoEnable = sharedPreferences.getBoolean(btAutoEnableKey, Bluetooth.IsAutoEnable);
+        } else if (key.equals(btAnswerDelayKey)) {
+            Bluetooth.ResponceMsecMax = sharedPreferences.getInt(btAnswerDelayKey, Bluetooth.ResponceMsecMax);
         }
     }
 

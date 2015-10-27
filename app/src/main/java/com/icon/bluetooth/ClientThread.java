@@ -1,10 +1,10 @@
 package com.icon.bluetooth;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
+import com.icon.agnks.Bluetooth;
 import com.icon.agnks.Logger;
 import com.icon.utils.Utils;
 
@@ -13,34 +13,25 @@ import java.lang.reflect.Method;
 
 public class ClientThread extends Thread {
 
-    private volatile Communicator communicator;
+    public interface ClientListener {
+//        Communicator createCommunicationThread(BluetoothSocket socket);
+        void connectionCompleted(BluetoothDevice remoteDevice, boolean isConnected);
+    }
 
     private final BluetoothSocket socket;
-    private BluetoothAdapter bluetoothAdapter;
-    private final CommunicationThread.CommunicatorService communicatorService;
+    private ClientListener clientListener;
+    private volatile Communicator communicator;
+    CommunicationThread.CommunicationListener communicationListener;
     private boolean isConnected;
 
-    public ClientThread(BluetoothDevice remoteDevice, CommunicationThread.CommunicatorService communicatorService, BluetoothAdapter bluetoothAdapter, boolean isInsecure) {
+    public ClientThread(BluetoothDevice remoteDevice, ClientListener clientListener, CommunicationThread.CommunicationListener communicationListener) {
 
-        this.communicatorService = communicatorService;
-        this.bluetoothAdapter = bluetoothAdapter;
+        this.clientListener = clientListener;
+        this.communicationListener = communicationListener;
         this.isConnected = false;
 
         BluetoothSocket tmp = null;
         try {
-            // 1
-//            tmp = (isInsecure) ? remoteDevice.createInsecureRfcommSocketToServiceRecord(UUID.fromString(TestActivity.UUID))
-//                    : remoteDevice.createRfcommSocketToServiceRecord(UUID.fromString(TestActivity.UUID));
-
-            // 2
-//            boolean temp = remoteDevice.fetchUuidsWithSdp();
-//            UUID uuid = null;
-//            if( temp ){
-//                uuid = remoteDevice.getUuids()[0].getUuid();
-//            }
-//            tmp = remoteDevice.createRfcommSocketToServiceRecord(uuid);
-
-            // 3
             Method m = remoteDevice.getClass().getMethod("createRfcommSocket", new Class[] {int.class});
             tmp = (BluetoothSocket) m.invoke(remoteDevice, 1);
 
@@ -56,31 +47,33 @@ public class ClientThread extends Thread {
         }
     }
 
-    public synchronized Communicator getCommunicator() {
-        return communicator;
+    public void setClientListener(ClientListener listener) {
+        this.clientListener = listener;
     }
+
+    public void setCommunicationListener(CommunicationThread.CommunicationListener listener) {
+        this.communicationListener = listener;
+    }
+
+//    public synchronized Communicator getCommunicator() {
+//        return communicator;
+//    }
 
     public void run() {
         if (socket == null) return;
 
-        bluetoothAdapter.cancelDiscovery();
+//        bluetoothAdapter.cancelDiscovery();
+        Bluetooth.cancelDiscovery();
         try {
             Logger.add("ClientThread: Before connecting to BluetoothSocket", Log.DEBUG);
             socket.connect();
 
             Logger.add("ClientThread: Connected to BluetoothSocket", Log.DEBUG);
             synchronized (this) {
-                communicator = communicatorService.createCommunicationThread(socket);
-                Logger.add("ClientThread: Communicator created", Log.DEBUG);
+//                communicator = clientListener.createCommunicationThread(socket);
+                communicator = new CommunicationThread(socket, communicationListener);
             }
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    communicator.startCommunication();
-                    Logger.add("ClientThread: Start ClientThread (communicator.startCommunication())", Log.DEBUG);
-                }
-            }).start();
+            Logger.add("ClientThread: Communicator created", Log.DEBUG);
 
             isConnected = true;
 
@@ -89,10 +82,33 @@ public class ClientThread extends Thread {
 
             closeSocket();
         } finally {
-//            synchronized (this) {
-                communicatorService.connectToDevice(socket.getRemoteDevice(), isConnected);
-//            }
+            clientListener.connectionCompleted(socket.getRemoteDevice(), isConnected);
         }
+    }
+
+    /**
+     *
+     */
+    public void startResponceListening() {
+        if (communicator == null) return;
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Logger.add("ClientThread: communicator.startCommunication()", Log.DEBUG);
+                communicator.startCommunication();
+            }
+        }).start();
+    }
+
+    /**
+     *
+     * @param bytes
+     */
+    public void sendBytes(byte[] bytes) {
+        if (communicator == null) return;
+
+        communicator.write(bytes);
     }
 
     public boolean isConnected() {
