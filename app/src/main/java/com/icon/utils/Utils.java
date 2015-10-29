@@ -2,6 +2,9 @@ package com.icon.utils;
 
 import android.bluetooth.BluetoothDevice;
 import android.text.format.Time;
+import android.view.View;
+
+import com.icon.agnks.Device;
 
 /**
  * Created by Ivan on 02.10.2015.
@@ -112,6 +115,23 @@ public class Utils {
 
 
     public static String getDeviceInfo(BluetoothDevice device) {
+        if (device == null) return null;
         return String.format("[%s, %s]", device.getName(), device.getAddress());
     }
+
+    public static String getDeviceInfo(Device device) {
+        if (device == null) return null;
+        return String.format("[%s, %s]", device.CustomName, device.MacAddress);
+    }
+
+    public static void append(StringBuilder sb, String... ss) {
+        if (sb == null) return;
+        for (String s : ss) {
+            sb.append(s);
+        }
+    }
+
+//    public static int toVisibility(boolean isEnabled, boolean goneIsNonEnabled) {
+//        return (isEnabled) ? View.VISIBLE: (goneIsNonEnabled) ? View.GONE : View.INVISIBLE;
+//    }
 }

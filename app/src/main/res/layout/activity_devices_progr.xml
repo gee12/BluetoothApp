@@ -13,39 +13,55 @@
             android:id="@+id/button_check_connection"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:onClick="setupConnect"
-            android:text="@string/str_setup_connect" />
+            android:onClick="checkConnect"
+            android:text="@string/str_check_connect" />
 
-
-        <RadioGroup
-            android:id="@+id/radio_group"
+        <TextView
+            android:id="@+id/textview_devices"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"/>
 
-            <RadioButton
-                android:id="@+id/radio_dec"
-                android:layout_width="wrap_content"
+        <!--<LinearLayout-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="match_parent"-->
+            <!--android:orientation="horizontal">-->
+            <RadioGroup
+                android:id="@+id/radio_group"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="dec" />
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/radio_dec"
+                    android:enabled="false"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:text="dec"/>
+                <RadioButton
+                    android:id="@+id/radio_hex"
+                    android:enabled="false"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="hex"/>
+            </RadioGroup>
+            <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_margin="5dp"-->
+                <!--android:text="@string/str_data" />-->
 
-            <RadioButton
-                android:id="@+id/radio_hex"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="hex" />
-        </RadioGroup>
+        <!--</LinearLayout>-->
+
 
         <EditText
             android:id="@+id/message_text"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:digits="0123456789ABCDEFabcdef "
             android:enabled="false"
+            android:layout_margin="5dp"
             android:gravity="top|left"
             android:hint="@string/str_data_hint"
+            android:digits="0123456789ABCDEFabcdef "
             android:inputType="textCapCharacters"
             android:lines="2" />
 
@@ -68,13 +84,13 @@
             <TextView
                 android:id="@+id/data_text"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"/>
         </ScrollView>
 
     </LinearLayout>
 
     <ProgressBar
-        android:id="@+id/progressBarMain"
+        android:id="@+id/progressBar"
         style="@android:style/Widget.ProgressBar.Large"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

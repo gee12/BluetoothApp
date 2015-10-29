@@ -8,44 +8,62 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.CountDownTimer;
 
 import com.icon.activities.R;
 import com.icon.bluetooth.ClientThread;
 import com.icon.bluetooth.CommunicationThread;
+import com.icon.utils.Utils;
 
 /**
  * Created by Ivan on 06.10.2015.
  */
 public class Bluetooth {
 
-    public static final int DEF_ANSWER_MAX_DELAY = 3000;
+    public static final int DEF_MAX_TIMEOUT = 3000;
 
     public static BluetoothAdapter Adapter;
-    public static int ResponceMsecMax = DEF_ANSWER_MAX_DELAY;
+    public static int MaxTimeout = DEF_MAX_TIMEOUT;
     public static boolean IsAutoEnable;
     private static BroadcastReceiver discoverFoundDeviceReceiver;
     private static BroadcastReceiver discoveryEndReceiver;
     private static ClientThread currentClientThread;
 
+    /**
+     * Инициализация Bluetooth-адаптера и получение значений настроек
+     * @param context
+     * @return
+     */
     public static boolean init(Context context) {
         Adapter = getAdapter(context);
         if (Adapter == null) return false;
 
-        ResponceMsecMax = Settings.getPref(context.getString(R.string.pref_key_answer_max_delay), ResponceMsecMax);
+        MaxTimeout = Settings.getPref(context.getString(R.string.pref_key_max_timeout), MaxTimeout);
         IsAutoEnable = Settings.getPref(context.getString(R.string.pref_key_is_need_bt_auto_enable), false);
-
         return true;
     }
 
+    /**
+     *
+     * @return
+     */
     public static boolean isEnabled() {
         return !(Adapter == null || !Adapter.isEnabled());
     }
 
+    /**
+     * Включение Bluetooth без запроса
+     */
     public static void enable() {
         Logger.add("Включаем Bluetooth", Logger.INFO);
         Adapter.enable();
     }
 
+    /**
+     * Включение Bluetooth с запросом к пользователю
+     * @param act
+     * @param requestCode
+     */
     public static void enable(Activity act, int requestCode) {
         Logger.add("Включаем Bluetooth", Logger.INFO);
         Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -68,36 +86,35 @@ public class Bluetooth {
         }
     }
 
+    /**
+     * Отключение Bluetooth
+     */
     public static void disable() {
         Logger.add("Выключаем Bluetooth", Logger.INFO);
         if (Adapter != null) Adapter.disable();
     }
 
+    /**
+     * Поиск активных устройств
+     */
     public static void startDiscovery() {
         if (Adapter != null) Adapter.startDiscovery();
     }
 
+    /**
+     * Остановка поиска активных устройств
+     */
     public static void cancelDiscovery() {
         if (Adapter != null) Adapter.cancelDiscovery();
     }
 
-//    public static void registerFoundDeviceReceiver(Context context, BroadcastReceiver receiver) {
-//        context.registerReceiver(receiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-//        Logger.add("Bluetooth: Регистрация FoundDeviceReceiver", Logger.INFO);
-//    }
-//    public static void registerEndDiscoveryReceiver(Context context, BroadcastReceiver receiver) {
-//        context.registerReceiver(receiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
-//        Logger.add("Bluetooth: Регистрация EndDiscoveryReceive", Logger.INFO);
-//    }
-//    public static void unregisterFoundDeviceReceiver(Context context) {
-//        unregisterReceiver(context, discoverFoundDeviceReceiver);
-//    }
-//    public static void unregisterEndDiscoveryReceiver(Context context) {
-//        unregisterReceiver(context, discoveryEndReceiver);
-//    }
-
-    public static void registerDiscoveryReceivers(Context context, final DiscoveryListener listener) {
-        //
+    /**
+     * Регистрация обработчиков поиска активных устройств в активности
+     * @param context
+     * @param listener
+     */
+    public static void registerDiscoveryReceivers(Context context, final OnDiscoveryListener listener) {
+        // при обнаружении активного устройства
         discoverFoundDeviceReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -112,7 +129,7 @@ public class Bluetooth {
                 }
             }
         };
-        //
+        // при завершении поиска
         discoveryEndReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -129,11 +146,20 @@ public class Bluetooth {
         Logger.add("Bluetooth: Регистрация FoundDeviceReceiver и DiscoveryEndReceiver", Logger.INFO);
     }
 
+    /**
+     * Сброс регистрации обработчиков
+     * @param context
+     */
     public static void unregisterDiscoveryReceivers(Context context) {
         unregisterReceiver(context, discoverFoundDeviceReceiver);
         unregisterReceiver(context, discoveryEndReceiver);
     }
 
+    /**
+     *
+     * @param context
+     * @param receiver
+     */
     public static void unregisterReceiver(Context context, BroadcastReceiver receiver) {
         if (receiver != null) {
             try {
@@ -145,10 +171,11 @@ public class Bluetooth {
         }
     }
 
-    public static BluetoothDevice getRemoteDevice(String mac) {
-        return Adapter.getRemoteDevice(mac);
-    }
-
+    /**
+     * Получение Bluetooth-адаптера на устройстве
+     * @param context
+     * @return
+     */
     public static BluetoothAdapter getAdapter(Context context) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR2) {
             BluetoothManager manager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -158,29 +185,85 @@ public class Bluetooth {
         }
     }
 
+    /**
+     * Получение BluetoothDevice устройства по mac-адресу
+     * @param mac
+     * @return
+     */
+    public static BluetoothDevice getRemoteDevice(String mac) {
+        return Adapter.getRemoteDevice(mac);
+    }
+
+    /**
+     * Создание нового объекта ClientThread для соединения с BluetoothDevice устройством
+     * в отдельном потоке
+     * и сохранение его в статической переменной currentClientThread
+     * @param btDevice
+     * @param clientListener
+     * @param communicationListener
+     * @return
+     */
     public static ClientThread createDeviceCommunication(BluetoothDevice btDevice,
                                                  ClientThread.ClientListener clientListener,
                                                  CommunicationThread.CommunicationListener communicationListener) {
 
+        Logger.add("Bluetooth: Создаем ClientThread для " + Utils.getDeviceInfo(btDevice), Logger.INFO);
         ClientThread client = new ClientThread(btDevice, clientListener, communicationListener);
         client.start();
         currentClientThread = client;
         return client;
     }
 
-    public static void cancelDeviceCommunication() {
+    /**
+     * Закрытие текущего соединения в currentClientThread
+     */
+    public static void cancelCurrentDeviceCommunication() {
         if (currentClientThread != null) {
+            Logger.add("Bluetooth: Закрываем ClientThread для " + Utils.getDeviceInfo(currentClientThread.getBluetoothDevice()), Logger.INFO);
             currentClientThread.cancel();
             currentClientThread = null;
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public static ClientThread getCurrentClientThread() {
         return currentClientThread;
     }
 
-    public static interface DiscoveryListener {
+    /**
+     * Интерфейс для создания обработчика поиска активных bluetooth-устройств
+     */
+    public interface OnDiscoveryListener {
         void onFounded(BluetoothDevice bluetoothDevice);
         void onFinished();
     }
+
+    public interface OnConnectionTimeoutListener {
+        void onTimeoutElapsed();
+    }
+
+    /**
+     * Таймер для проверки лимита времени на соединение
+     */
+    public static class ConnectionTimer extends CountDownTimer {
+        OnConnectionTimeoutListener listener;
+
+        public ConnectionTimer(long timeout, OnConnectionTimeoutListener listener) {
+            super(timeout, timeout);
+            this.listener = listener;
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+        }
+
+        @Override
+        public void onFinish() {
+            listener.onTimeoutElapsed();
+        }
+    }
+
 }

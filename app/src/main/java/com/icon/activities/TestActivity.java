@@ -40,8 +40,8 @@ public class TestActivity extends BaseListActivity implements ClientThread.Clien
         @Override
         protected Void doInBackground(byte[]... params) {
             try {
-//                clientThread.getCommunicator().write(params[0]);
-                clientThread.sendBytes(params[0]);
+                clientThread.getCommunicator().write(params[0]);
+//                clientThread.sendBytes(params[0]);
             } catch (Exception ex) {
                 Logger.add(ex);
             }
@@ -64,12 +64,6 @@ public class TestActivity extends BaseListActivity implements ClientThread.Clien
     private ProgressBar progressBarMain;
     private boolean isDiscoveryAtWork;
 
-//    private final CommunicationThread.CommunicationListener communicationListener = new CommunicationThread.CommunicationListener() {
-//        @Override
-//        public Communicator createCommunicationThread(BluetoothSocket socket) {
-//
-//            return new CommunicationThread(socket, new CommunicationThread.CommunicationListener() {
-
     @Override
     public void onMessage(final byte[] bytes) {
         runOnUiThread(new Runnable() {
@@ -83,14 +77,12 @@ public class TestActivity extends BaseListActivity implements ClientThread.Clien
     }
 
     @Override
-    public void responceTimeElapsed() {
+    public void onResponceTimeElapsed() {
 
     }
-//            });
-//        }
 
         @Override
-        public void connectionCompleted(final BluetoothDevice remoteDevice, final boolean isConnected) {
+        public void onConnectionCompleted(final BluetoothDevice remoteDevice, final boolean isConnected) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -285,9 +277,7 @@ public class TestActivity extends BaseListActivity implements ClientThread.Clien
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
+    protected void onStop() {
         if (bluetoothAdapter != null)
             bluetoothAdapter.cancelDiscovery();
 
@@ -296,5 +286,6 @@ public class TestActivity extends BaseListActivity implements ClientThread.Clien
         if (clientThread != null) {
             clientThread.cancel();
         }
+        super.onStop();
     }
 }

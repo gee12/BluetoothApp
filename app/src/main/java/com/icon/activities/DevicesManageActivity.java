@@ -1,12 +1,16 @@
 package com.icon.activities;
 
 import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.icon.agnks.Device;
@@ -14,27 +18,28 @@ import com.icon.agnks.Bluetooth;
 import com.icon.agnks.Database;
 import com.icon.agnks.Logger;
 import com.icon.utils.MessageBox;
+import com.icon.utils.Utils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class DevicesManageActivity extends BaseListActivity implements Bluetooth.DiscoveryListener {
+public class DevicesManageActivity extends BaseListActivity implements Bluetooth.OnDiscoveryListener {
 
     public final static int REQUEST_ENABLE_BT = 1;
     public final static int REQUEST_ADD_DEVICE = 2;
     public final static int REQUEST_EDIT_DEVICE = 3;
     public final static String PARSEL_TAG_DEVICES = "PARSEL_TAG_DEVICES";
-
-//    private BluetoothAdapter bluetoothAdapter;
-    private BroadcastReceiver discoverDevicesReceiver;
-    private BroadcastReceiver discoveryFinishedReceiver;
+    public final static String PARSEL_TAG_IS_GROUP_MODE = "PARSEL_TAG_IS_GROUP_MODE";
 
     private DevicesArrayAdapter listAdapter;
     private Button buttonDiscovery;
     private ProgressBar progressBar;
+    private CheckBox checkBoxAll;
+    private LinearLayout layoutBottomButtons;
+    private MenuItem menuItemGroup;
     private boolean isDiscoveryAtWork;
-//    private Database database;
     private Device currentDevice;
+    private boolean isGroupMode;
 
     /**
      *
@@ -67,6 +72,8 @@ public class DevicesManageActivity extends BaseListActivity implements Bluetooth
 
         buttonDiscovery = (Button) findViewById(R.id.discovery_button);
         progressBar = (ProgressBar) findViewById(R.id.progressBarList);
+        checkBoxAll = (CheckBox)findViewById(R.id.checkBox_all);
+        layoutBottomButtons = (LinearLayout)findViewById(R.id.layout_bottom_buttons);
 
         //
         DevicesArrayAdapter.DevicesListener devicesListener = new DevicesArrayAdapter.DevicesListener() {
@@ -108,35 +115,103 @@ public class DevicesManageActivity extends BaseListActivity implements Bluetooth
             }
         };
 
-        //
-//        database = new Database(this);
-
         List<Device> devices = null;
-
         if (savedInstanceState != null) {
             devices = savedInstanceState.getParcelableArrayList(PARSEL_TAG_DEVICES);
+            isGroupMode = savedInstanceState.getBoolean(PARSEL_TAG_IS_GROUP_MODE);
         }
         else {
-//            devices = database.selectAllToList();
             devices = Database.getDevices();
         }
 
         //
         try {
-//            bluetoothAdapter = Bluetooth.getAdapter(this);
             listAdapter = new DevicesArrayAdapter(this, getListView(), devices, devicesListener);
+            int vis = (isGroupMode) ? View.VISIBLE : View.GONE;
+            listAdapter.setCheckboxesVisibility(vis, false);
         } catch(Exception ex) {
             Logger.add(ex);
         }
         setListAdapter(listAdapter);
+
+        //
+        if (savedInstanceState != null) setMode(isGroupMode);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         ArrayList<Device> devices = (ArrayList<Device>) listAdapter.getAllDevices();
         outState.putParcelableArrayList(PARSEL_TAG_DEVICES, devices);
+        outState.putBoolean(PARSEL_TAG_IS_GROUP_MODE, isGroupMode);
 
         super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        BaseActivity.onCreateOptionsMenu(this, menu);
+        menuItemGroup = menu.add((isGroupMode) ? "Откл.групповой выбор" : "Групповой выбор");
+        menuItemGroup.setOnMenuItemClickListener(new GroupingMenuItemClickListener());
+        return true;
+    }
+
+    private class GroupingMenuItemClickListener implements MenuItem.OnMenuItemClickListener {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            isGroupMode = !isGroupMode;
+            //
+            setMode(isGroupMode);
+            return true;
+        }
+    }
+
+    private void setMode(boolean isGroupMode) {
+        if (menuItemGroup != null) {
+            String text = (isGroupMode) ? "Откл.групповой выбор" : "Групповой выбор";
+            menuItemGroup.setTitle(text);
+        }
+        int vis = (isGroupMode) ? View.VISIBLE : View.GONE;
+        checkBoxAll.setVisibility(vis);
+        listAdapter.setCheckboxesVisibility(vis, true);
+        layoutBottomButtons.setVisibility(vis);
+    }
+
+    public void selectAll(View view) {
+        CheckBox checkBox = (CheckBox)view;
+        boolean isChecked = checkBox.isChecked();
+        listAdapter.setCheckboxesChecked(isChecked);
+    }
+
+    public void deleteDevices(View view) {
+        List<Device> checked = listAdapter.getCheckedDevices();
+        StringBuilder sb = new StringBuilder();
+        for (Device device : checked) {
+            int res = Database.delete(this, device);
+            if (res > 0) {
+                listAdapter.delete(device);
+            } else {
+                Utils.append(sb, "Не удается удалить ", Utils.getDeviceInfo(device), "\n");
+            }
+        }
+        if (sb.length() != 0) MessageBox.shoter(DevicesManageActivity.this, sb.toString());
+    }
+
+    public void progrDevices(View view) {
+        progrDevices(ProgrDevicesGroupActivity.class);
+    }
+
+    public void progrDevices2(View view) {
+        progrDevices(ProgrDevicesGroupActivity2.class);
+    }
+
+    public void progrDevices(Class<?> clazz) {
+        List<Device> checked = listAdapter.getCheckedDevices();
+        // show programming activity
+        Intent intent = new Intent(this, clazz);
+        Bundle bundle = new Bundle();
+        bundle.putParcelableArrayList(Device.KEY_DEVICE_OBJECTS, (ArrayList<? extends Parcelable>) checked);
+        intent.putExtras(bundle);
+        startActivity(intent);
     }
 
     /**
@@ -144,18 +219,6 @@ public class DevicesManageActivity extends BaseListActivity implements Bluetooth
      * @param view
      */
     public void discoverDevices(View view) {
-
-//        if (bluetoothAdapter == null) {
-//            MessageBox.shoter(this, "Не найден Bluetooth адаптер на устройстве");
-//            finish();
-//            return;
-//        }
-//
-//        if (!bluetoothAdapter.isEnabled()) {
-//            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-//            startActivityForResult(intent, REQUEST_ENABLE_BT);
-//            return;
-//        }
 
         Bluetooth.enableIfNeed(this, REQUEST_ENABLE_BT);
         if (!Bluetooth.isEnabled() && Bluetooth.IsAutoEnable) {
@@ -166,44 +229,11 @@ public class DevicesManageActivity extends BaseListActivity implements Bluetooth
         _discoverDevices();
     }
     public void _discoverDevices() {
-
         setDiscoveryState(!isDiscoveryAtWork);
 
         if (!isDiscoveryAtWork) return;
 
-        //
-//        if (discoverDevicesReceiver == null) {
-//            discoverDevicesReceiver = new BroadcastReceiver() {
-//                @Override
-//                public void onReceive(Context context, Intent intent) {
-//                    try {
-//                        String action = intent.getAction();
-//                        if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-//                            final BluetoothDevice btDevice = (BluetoothDevice) intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-//                            final Device device = new Device(btDevice, Device.STATE_ONLINE);
-//                            listAdapter.addFoundedDevice(device);
-//                        }
-//                    } catch(Exception ex) {
-//                        Logger.add("DevicesManageActivity.discoverDevices(): BroadcastReceiver.onReceive(): ", ex);
-//                    }
-//                }
-//            };
-//        }
-//        //
-//        if (discoveryFinishedReceiver == null) {
-//            discoveryFinishedReceiver = new BroadcastReceiver() {
-//                @Override
-//                public void onReceive(Context context, Intent intent) {
-//                    setDiscoveryState(false);
-//                }
-//            };
-//        }
-        //
-//        registerReceiver(discoverDevicesReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-//        registerReceiver(discoveryFinishedReceiver, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
         Bluetooth.registerDiscoveryReceivers(this, this);
-
-//        bluetoothAdapter.startDiscovery();
         Bluetooth.startDiscovery();
     }
 
@@ -237,8 +267,7 @@ public class DevicesManageActivity extends BaseListActivity implements Bluetooth
             progressBar.setVisibility(ProgressBar.INVISIBLE);
             MessageBox.shoter(getBaseContext(), "Поиск закончен. Выберите устройство для соединения");
 
-            unregisterReceivers();
-//            bluetoothAdapter.cancelDiscovery();
+            Bluetooth.unregisterDiscoveryReceivers(this);
             Bluetooth.cancelDiscovery();
         }
         getListView().setEnabled(!isAtWork);
@@ -301,40 +330,11 @@ public class DevicesManageActivity extends BaseListActivity implements Bluetooth
         }
     }
 
-    /**
-     *
-     */
-    public void unregisterReceivers() {
-        Bluetooth.unregisterReceiver(this, discoverDevicesReceiver);
-        Bluetooth.unregisterReceiver(this, discoveryFinishedReceiver);
-//        if (discoverDevicesReceiver != null) {
-//            try {
-//                unregisterReceiver(discoverDevicesReceiver);
-//                discoverDevicesReceiver = null;
-//            } catch (Exception e) {
-//                Logger.add("DevicesManageActivity: Не удалось отключить ресивер discoverDevicesReceiver", Log.ERROR);
-//            }
-//        }
-//
-//        if (discoveryFinishedReceiver != null) {
-//            try {
-//                unregisterReceiver(discoveryFinishedReceiver);
-//                discoveryFinishedReceiver = null;
-//            } catch (Exception e) {
-//                Logger.add("DevicesManageActivity: Не удалось отключить ресивер discoveryFinishedReceiver", Log.ERROR);
-//            }
-//        }
-    }
-
-    /*
-    *
-     */
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-
+        Bluetooth.unregisterDiscoveryReceivers(this);
         Bluetooth.cancelDiscovery();
 
-        unregisterReceivers();
+        super.onDestroy();
     }
 }

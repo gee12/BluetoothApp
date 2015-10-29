@@ -28,11 +28,7 @@ public class BaseActivity extends Activity {
      * @return
      */
     public static boolean onCreateOptionsMenu(Activity activity, Menu menu) {
-        int menuRes = R.menu.menu_user;
-        if (Access.isAdmin())
-            menuRes = R.menu.menu_admin;
-        else if (Access.isUser())
-            menuRes = R.menu.menu_user;
+        int menuRes = (Access.isAdmin()) ? R.menu.menu_admin : R.menu.menu_user;
         activity.getMenuInflater().inflate(menuRes, menu);
 
         return true;

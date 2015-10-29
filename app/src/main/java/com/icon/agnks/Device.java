@@ -15,9 +15,8 @@ public class Device implements /*Serializable,*/ Comparable<Device>, Parcelable 
 
     public static final String KEY_DEVICE_ID = "DeviceIdKey";
     public static final String KEY_DEVICE_OBJECT = "DeviceObject";
-//    public static final String KEY_DEVICE_NAME = "DeviceName";
+    public static final String KEY_DEVICE_OBJECTS = "DeviceObjects";
     public static final String KEY_DEVICE_CUSTOM_NAME = "CustomName";
-//    public static final String KEY_DEVICE_MAC_ADDRESS = "MacAddress";
 
     public static String UNKNOWN_DEVICE = "Неизвестное устройство";
     public static String DEF_MAC_ADDRESS = "0000";
@@ -33,7 +32,7 @@ public class Device implements /*Serializable,*/ Comparable<Device>, Parcelable 
     public String MacAddress;
     public int State;
     public boolean IsSaved;
-//    public boolean AutoLinking;
+    public boolean IsSelected;
 
     public Device() {
         init(0, UNKNOWN_DEVICE, UNKNOWN_DEVICE, DEF_MAC_ADDRESS, STATE_OFFLINE, false);

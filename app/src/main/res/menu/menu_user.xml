@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.icon.activities.BaseActivity">
     <item android:id="@+id/action_manage_devices" android:title="@string/action_devices_manage" />
-    <item android:id="@+id/action_test" android:title="@string/action_test" />
+    <!--<item android:id="@+id/action_test" android:title="@string/action_test" />-->
     <item android:id="@+id/action_settings" android:title="@string/action_settings" />
     <item android:id="@+id/action_about" android:title="@string/action_about" />
 </menu>

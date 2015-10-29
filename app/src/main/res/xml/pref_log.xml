@@ -30,7 +30,7 @@
 
         <PreferenceScreen android:title="Показать логи"
             android:dependency="@string/pref_key_is_need_log">
-            <intent android:action="com.icon.agnks.LogActivity" />
+            <intent android:action="LogActivity" />
         </PreferenceScreen>
 
         <com.icon.activities.ClearLogsDialogPreference

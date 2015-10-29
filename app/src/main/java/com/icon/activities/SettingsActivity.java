@@ -127,7 +127,7 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         String userPassKey = getString(R.string.pref_key_user_pass);
         String adminPassKey = getString(R.string.pref_key_admin_pass);
         String btAutoEnableKey = getString(R.string.pref_key_is_need_bt_auto_enable);
-        String btAnswerDelayKey = getString(R.string.pref_key_answer_max_delay);
+        String btAnswerDelayKey = getString(R.string.pref_key_max_timeout);
         if (key.equals(isNeedLogKey)) {
             Logger.IsNeedLog = sharedPreferences.getBoolean(isNeedLogKey, true);
         } else if (key.equals(maxSizeKey)) {
@@ -141,7 +141,7 @@ public class SettingsActivity extends PreferenceActivity /*implements SharedPref
         } else if (key.equals(btAutoEnableKey)) {
             Bluetooth.IsAutoEnable = sharedPreferences.getBoolean(btAutoEnableKey, Bluetooth.IsAutoEnable);
         } else if (key.equals(btAnswerDelayKey)) {
-            Bluetooth.ResponceMsecMax = sharedPreferences.getInt(btAnswerDelayKey, Bluetooth.ResponceMsecMax);
+            Bluetooth.MaxTimeout = Integer.parseInt(sharedPreferences.getString(btAnswerDelayKey, String.valueOf(Bluetooth.MaxTimeout)));
         }
     }
 

@@ -10,17 +10,16 @@
 
         <EditTextPreference
             android:defaultValue="3000"
-            android:dialogTitle="Время ожидания ответа"
+            android:dialogTitle="Таймаут ожидания ответа"
             android:inputType="number"
-            android:key="@string/pref_key_answer_max_delay"
+            android:key="@string/pref_key_max_timeout"
             android:maxLength="6"
             android:summary="Максимальное время ожидания ответа от Bluetooth-устройства (мсек)"
-            android:title="Время ожидания ответа" />
+            android:title="Таймаут ожидания ответа" />
 
         <Preference android:title="Настройки Bluetooth"
             android:summary="Системные настройки">
             <intent android:action="android.settings.BLUETOOTH_SETTINGS" />
-            <!--<intent android:action="com.android.settings.bluetooth.BluetoothSettings" />-->
         </Preference>
 
     </PreferenceCategory>

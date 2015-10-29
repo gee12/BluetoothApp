@@ -1,7 +1,6 @@
 package com.icon.activities;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -26,14 +25,11 @@ import com.icon.utils.Utils;
 
 public class ProgrDeviceActivity extends Activity implements ClientThread.ClientListener, CommunicationThread.CommunicationListener {
 
-//    public final byte[] TEST_BYTES = Utils.toBytes(0xF0, 0x9E, 0x7B, 0, 0, 0, 0x19, 0xF1);
-//    public final static String UUID = "5e354ea0-668a-11e5-a837-0800200c9a66";
     public static final String TAG_IS_CONNECTED = "TagIsConnected";
     public static final String TAG_RADIX = "TagRadix";
     public static final String TAG_TEXT = "TagText";
     public final static String SEPAR = " ";
 
-//    private BluetoothAdapter bluetoothAdapter;
     private ClientThread clientThread;
     private Device device;
 
@@ -41,26 +37,24 @@ public class ProgrDeviceActivity extends Activity implements ClientThread.Client
     private Button buttonSendMessage;
     private ProgressBar progressBarMain;
     private ScrollView scrollView;
-    private TextView textView;
+    private static TextView textView; // !! без static не добавляет текст в onMessage()
+    private RadioGroup radioGroup;
     private EditText editText;
     private boolean isConnected;
     private int radix = Utils.RADIX_DEC;
 
-    /*
-    *
-    */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_progr);
 
-        textView = (TextView) findViewById(R.id.data_text1);
+        textView = (TextView) findViewById(R.id.data_text);
         textView.setMovementMethod(new ScrollingMovementMethod());
         scrollView = (ScrollView)findViewById(R.id.scrollView);
 
         editText = (EditText) findViewById(R.id.message_text);
         buttonSendMessage = (Button) findViewById(R.id.button_send_message);
-        buttonSetupConnect = (Button) findViewById(R.id.button_setup_connect);
+        buttonSetupConnect = (Button) findViewById(R.id.button_check_connection);
         progressBarMain = (ProgressBar) findViewById(R.id.progressBarMain);
 
         Bluetooth.enableIfNeed(this, DevicesManageActivity.REQUEST_ENABLE_BT);
@@ -71,7 +65,7 @@ public class ProgrDeviceActivity extends Activity implements ClientThread.Client
             finish();
         }
 
-        RadioGroup radioGroup = (RadioGroup)findViewById(R.id.radio_group);
+        radioGroup = (RadioGroup)findViewById(R.id.radio_group);
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -85,33 +79,33 @@ public class ProgrDeviceActivity extends Activity implements ClientThread.Client
             }
         });
 
-        if (savedInstanceState != null) {
-            isConnected = savedInstanceState.getBoolean(TAG_IS_CONNECTED);
-            radix = savedInstanceState.getInt(TAG_RADIX);
-            device = savedInstanceState.getParcelable(Device.KEY_DEVICE_OBJECT);
-            String text = savedInstanceState.getString(TAG_TEXT);
-
-            if (isConnected) clientThread = Bluetooth.getCurrentClientThread();
-            textView.setText(text);
-            int radioId = (radix == Utils.RADIX_DEC) ? R.id.radio_dec : R.id.radio_hex;
-            radioGroup.check(radioId);
-            int connStringId = (isConnected) ? R.string.str_close_connect : R.string.str_setup_connect;
-            buttonSetupConnect.setText(connStringId);
-            buttonSendMessage.setEnabled(isConnected);
-            editText.setEnabled(isConnected);
-        }
+//        if (savedInstanceState != null) {
+//            isConnected = savedInstanceState.getBoolean(TAG_IS_CONNECTED);
+//            radix = savedInstanceState.getInt(TAG_RADIX);
+//            device = savedInstanceState.getParcelable(Device.KEY_DEVICE_OBJECT);
+//            String text = savedInstanceState.getString(TAG_TEXT);
+//
+//            if (isConnected) clientThread = Bluetooth.getCurrentClientThread();
+//            textView.setText(text);
+//            int radioId = (radix == Utils.RADIX_DEC) ? R.id.radio_dec : R.id.radio_hex;
+//            radioGroup.check(radioId);
+//            int connStringId = (isConnected) ? R.string.str_close_connect : R.string.str_setup_connect;
+//            buttonSetupConnect.setText(connStringId);
+//            buttonSendMessage.setEnabled(isConnected);
+//            editText.setEnabled(isConnected);
+//            radioGroup.setEnabled(isConnected);
+//        }
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        outState.putBoolean(TAG_IS_CONNECTED, isConnected);
-        outState.putInt(TAG_RADIX, radix);
-        outState.putString(TAG_TEXT, textView.getText().toString());
-        outState.putParcelable(Device.KEY_DEVICE_OBJECT, device);
-
-    }
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        super.onSaveInstanceState(outState);
+//
+//        outState.putBoolean(TAG_IS_CONNECTED, isConnected);
+//        outState.putInt(TAG_RADIX, radix);
+//        outState.putString(TAG_TEXT, textView.getText().toString());
+//        outState.putParcelable(Device.KEY_DEVICE_OBJECT, device);
+//    }
 
     /**
      *
@@ -147,16 +141,16 @@ public class ProgrDeviceActivity extends Activity implements ClientThread.Client
         buttonSendMessage.setEnabled(false);
         buttonSetupConnect.setEnabled(false);
         editText.setEnabled(false);
+        radioGroup.setEnabled(false);
         textView.setText("");
     }
 
     @Override
-    public void connectionCompleted(final BluetoothDevice remoteDevice, final boolean isConnected) {
+    public void onConnectionCompleted(final BluetoothDevice remoteDevice, final boolean isConnected) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 ProgrDeviceActivity.this.isConnected = isConnected;
-                buttonSendMessage.setEnabled(isConnected);
                 String deviceInfo = Utils.getDeviceInfo(remoteDevice);
                 String strResult = (isConnected) ? " установлено" : " НЕ установлено";
                 MessageBox.shoter(ProgrDeviceActivity.this, "Соединение с устройством " + deviceInfo + strResult);
@@ -167,6 +161,7 @@ public class ProgrDeviceActivity extends Activity implements ClientThread.Client
                 buttonSetupConnect.setText(connStringId);
                 buttonSendMessage.setEnabled(true);
                 buttonSetupConnect.setEnabled(true);
+                radioGroup.setEnabled(true);
                 editText.setEnabled(true);
             }
         });
@@ -178,33 +173,37 @@ public class ProgrDeviceActivity extends Activity implements ClientThread.Client
             @Override
             public void run() {
                 String message = Utils.toString(bytes, SEPAR, Utils.RADIX_HEX);
-                appendTextData("Принято: " + message);
-                MessageBox.shoter(ProgrDeviceActivity.this, message);
-//                textView.setText(message);
-                Logger.add("ProgrDeviceActivity: Received: [" + message + "]", Log.INFO);
+                String s = "Принято: " + message;
+                appendTextData(s);
+                MessageBox.shoter(ProgrDeviceActivity.this, s);
+
+                Logger.add("ProgrDeviceActivity: Принято: [" + message + "]", Log.INFO);
             }
         });
     }
 
     @Override
-    public void responceTimeElapsed() {
+    public void onResponceTimeElapsed() {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                appendTextData("Время ожидания ответа истекло (" + Bluetooth.ResponceMsecMax + " мсек)");
+                String s = "Время ожидания ответа истекло (" + Bluetooth.MaxTimeout + " мсек)";
+                appendTextData(s);
+                MessageBox.shoter(ProgrDeviceActivity.this, s);
+                Logger.add("ProgrDeviceActivity: " + s, Log.INFO);
             }
         });
     }
 
-//    @Override
-//    protected void onResume() {
-//        super.onResume();
-//
-//        if (clientThread != null) {
-//            clientThread.setClientListener(this);
-//            clientThread.setCommunicationListener(this);
-//        }
-//    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (clientThread != null) {
+            clientThread.setClientListener(this);
+            clientThread.setCommunicationListener(this);
+        }
+    }
 
     public void closeClient() {
         if (clientThread != null) {
@@ -215,6 +214,7 @@ public class ProgrDeviceActivity extends Activity implements ClientThread.Client
         buttonSetupConnect.setText(R.string.str_setup_connect);
         buttonSendMessage.setEnabled(false);
         editText.setEnabled(false);
+        radioGroup.setEnabled(false);
         textView.setText("");
     }
 
@@ -236,7 +236,7 @@ public class ProgrDeviceActivity extends Activity implements ClientThread.Client
                 MessageBox.shoter(this, "Не удается распарсить данные");
             }
             if (bytes != null) {
-                new WriteTask().execute(bytes);
+                new WriteReadTask().execute(bytes);
                 appendTextData("Отправлено: " + Utils.toString(bytes, SEPAR, radix));
             }
         } else {
@@ -266,22 +266,22 @@ public class ProgrDeviceActivity extends Activity implements ClientThread.Client
      *
      */
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-//        closeClient();
+    protected void onStop() {
+        super.onStop();
     }
 
     /**
-     *
+     * Передача данных и прием ответа в отдельном потоке
      */
-    private class WriteTask extends AsyncTask<byte[], Void, Void> {
+    private class WriteReadTask extends AsyncTask<byte[], Void, Void> {
         @Override
         protected Void doInBackground(byte[]... params) {
             try {
-//                clientThread.getCommunicator().write(params[0]);
-                clientThread.sendBytes(params[0]);
-                clientThread.startResponceListening();
+                if (clientThread == null) {
+                    Logger.add("WriteReadTask.doInBackground(): clientThread is null", Logger.DEBUG);
+                    return null;
+                }
+                clientThread.getCommunicator().writeAndListenResponce(params[0]);
             } catch (Exception ex) {
                 Logger.add(ex);
             }

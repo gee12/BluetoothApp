@@ -1,4 +1,4 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:descendantFocusability="beforeDescendants"
@@ -12,10 +12,19 @@
         android:onClick="discoverDevices"
         android:text="@string/str_discover_devices" />
 
+    <CheckBox
+        android:id="@+id/checkBox_all"
+        android:onClick="selectAll"
+        android:visibility="gone"
+        android:text="Выбрать все"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <RelativeLayout
+        android:id="@+id/layout_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/discovery_button">
+        android:layout_weight="1"
+        android:layout_height="match_parent">
 
         <ListView
             android:id="@android:id/list"
@@ -24,7 +33,7 @@
 
         <LinearLayout
             android:id="@android:id/empty"
-            android:layout_width="fill_parent"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
             android:weightSum="1">
@@ -58,5 +67,36 @@
 
     </RelativeLayout>
 
-</RelativeLayout>
+    <LinearLayout
+        android:id="@+id/layout_bottom_buttons"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button_delete"
+            android:onClick="deleteDevices"
+            android:text="Удалить"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/button_progr"
+            android:onClick="progrDevices"
+            android:text="Прогр."
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+        <Button
+            android:id="@+id/button_progr2"
+            android:onClick="progrDevices2"
+            android:text="Прогр2"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+</LinearLayout>
 

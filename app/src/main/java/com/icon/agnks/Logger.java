@@ -281,7 +281,7 @@ public class Logger {
     }
 
     public static String formatLogMessage(String message) {
-        return String.format("\n%s - %s", Utils.timeNow().format("%d.%m.%Y %H:%M:%S"), message);
+        return String.format("%s - %s\n", Utils.timeNow().format("%d.%m.%Y %H:%M:%S"), message);
     }
 
     public static int cutIfMore(File file, long maxBytes, int maxLines) throws IOException {

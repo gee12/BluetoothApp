@@ -16,7 +16,7 @@ public class CommunicationThread extends Thread implements Communicator {
 
     public interface CommunicationListener {
         void onMessage(byte[] bytes);
-        void responceTimeElapsed();
+        void onResponceTimeElapsed();
     }
 
     private final BluetoothSocket socket;
@@ -40,7 +40,7 @@ public class CommunicationThread extends Thread implements Communicator {
     }
 
     @Override
-    public void startCommunication() {
+    public void listenMessage() {
         if (listener == null) {
             Logger.add("CommunicationThread: CommunicationListener object is null", Log.ERROR, true);
             return;
@@ -49,10 +49,8 @@ public class CommunicationThread extends Thread implements Communicator {
         byte[] buffer = new byte[1024];
         int bytes;
 
-        int responceMsec = Bluetooth.ResponceMsecMax;
+        int responceMsec = Bluetooth.MaxTimeout;
         long startTime = System.currentTimeMillis();
-
-//        inputStream.reset();
 
         while (startTime + responceMsec > System.currentTimeMillis()) {
             try {
@@ -62,7 +60,6 @@ public class CommunicationThread extends Thread implements Communicator {
                     Logger.add("CommunicationThread: Read " + bytes + " bytes", Log.DEBUG);
 
                     listener.onMessage(Arrays.copyOfRange(buffer, 0, bytes));
-
                     return;
                 }
             } catch (IOException ex) {
@@ -71,7 +68,7 @@ public class CommunicationThread extends Thread implements Communicator {
             }
         }
         //
-        listener.responceTimeElapsed();
+        listener.onResponceTimeElapsed();
         Logger.add("CommunicationThread: Responce time " + responceMsec + " (msec) elapsed", Log.DEBUG);
     }
 
@@ -81,6 +78,25 @@ public class CommunicationThread extends Thread implements Communicator {
             outputStream.write(bytes);
         } catch (IOException ex) {
             Logger.add("CommunicationThread: Write to OutputStream", ex);
+        }
+    }
+
+    @Override
+    public void writeAndListenResponce(byte[] bytes) {
+        try {
+            Logger.add("CommunicationThread: Write: [" + Utils.toString(bytes, ",", Utils.RADIX_HEX) + "]", Log.DEBUG);
+            outputStream.write(bytes);
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Logger.add("CommunicationThread: listenMessage()", Log.DEBUG);
+                    listenMessage();
+                }
+            }).start();
+
+        } catch (IOException ex) {
+            Logger.add("CommunicationThread: writeAndListenResponce()", ex);
         }
     }
 

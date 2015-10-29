@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -34,41 +36,14 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
     private ListView listView;
     private final List<Device> list;
     private final List<Device> dbDevices;
-//    private final List<Device> newDevices;
-//    private int discoveredDevicesCount = 0;
     private DevicesListener devicesListener;
-
-    /*
-    *
-     */
-//    public DevicesArrayAdapter(Context context, ListView listView, List<Device> dbDevices, DevicesListener devicesListener) {
-//        this.context = context;
-//        this.listView = listView;
-//        this.dbDevices = dbDevices;
-//        this.devicesListener = devicesListener;
-//        this.list = new ArrayList<>();
-//        reinit(dbDevices, false);
-//    }
-
-//    public DevicesArrayAdapter(Context context, ListView listView, List<Device> allDevices, int discoveredDevicesCount, DevicesListener devicesListener) {
-//        this.context = context;
-//        this.listView = listView;
-//        this.list = allDevices;
-//        this.dbDevices = new ArrayList<>();
-//        reinitDbDevices(allDevices);
-//        this.devicesListener = devicesListener;
-//        this.discoveredDevicesCount = discoveredDevicesCount;
-//        reinit(dbDevices, false);
-//    }
+    private int checkboxesVisibility = View.GONE;
 
     public DevicesArrayAdapter(Context context, ListView listView, List<Device> devices, DevicesListener devicesListener) {
         this.context = context;
         this.listView = listView;
         this.list = new ArrayList<>();
         this.dbDevices = new ArrayList<>();
-
-//        this.newDevices = new ArrayList<>();
-
         this.devicesListener = devicesListener;
         reinit(devices, false);
     }
@@ -77,21 +52,13 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
     public void reinit(List<Device> devices, boolean isNeedNotify) {
         List<Device> toAdd = new ArrayList<>(devices);
 
-//        this.discoveredDevicesCount = 0;
-
         this.list.clear();
         this.list.addAll(toAdd);
 
         this.dbDevices.clear();
-
-//        this.newDevices.clear();
-
         for (Device device : toAdd) {
             if (device.IsSaved)
                 this.dbDevices.add(device);
-//            else
-//                this.newDevices.add(device);
-//                this.discoveredDevicesCount++;
         }
 
         if (isNeedNotify) notifyDataSetChanged();
@@ -154,11 +121,8 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
             if (type == LIST_ITEM_TYPE_EXIST) {
                 view = LayoutInflater.from(context).inflate(R.layout.template_list_item_exist, parent, false);
 
-                ImageButton buttonDelete = (ImageButton) view.findViewById(R.id.template_list_item_delete);
-                ImageButton buttonEdit = (ImageButton) view.findViewById(R.id.template_list_item_edit);
-                ImageButton buttonProgr = (ImageButton) view.findViewById(R.id.template_list_item_progr);
-
                 // delete
+                ImageButton buttonDelete = (ImageButton) view.findViewById(R.id.template_list_item_delete);
                 buttonDelete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -167,6 +131,7 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
                 })
                 ;
                 // edit
+                ImageButton buttonEdit = (ImageButton) view.findViewById(R.id.template_list_item_edit);
                 buttonEdit.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -175,10 +140,22 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
                 });
 
                 // programming
+                ImageButton buttonProgr = (ImageButton) view.findViewById(R.id.template_list_item_progr);
                 buttonProgr.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         devicesListener.onProgramming(device);
+                    }
+                });
+
+                // checkbox
+                CheckBox checkBox = (CheckBox)view.findViewById(R.id.checkBox_item);
+                checkBox.setVisibility(checkboxesVisibility);
+                checkBox.setChecked(device.IsSelected);
+                checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        device.IsSelected = isChecked;
                     }
                 });
             //
@@ -209,7 +186,6 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
     *
      */
     public void setDeviceViewState(Device device, View view) {
-//        View view = getViewByPosition(getPosition(device));
         int resColor;
         int state = device.State;
         switch (state) {
@@ -241,6 +217,26 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
         }
     }
 
+    public void setCheckboxesVisibility(int vis, boolean isNeednotify) {
+        checkboxesVisibility = vis;
+        if (isNeednotify) notifyDataSetChanged();
+    }
+
+    public void setCheckboxesChecked(boolean isChecked) {
+        for (Device device : list) {
+            if (device.IsSaved) device.IsSelected = isChecked;
+        }
+        notifyDataSetChanged();
+    }
+
+    public List<Device> getCheckedDevices() {
+        List<Device> res = new ArrayList<>();
+        for (Device device : list) {
+            if (device.IsSelected) res.add(device);
+        }
+        return res;
+    }
+
     /*
     *
     */
@@ -261,8 +257,6 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
         } else {
             addFoundedLikeNewDevice(device);
         }
-//        setDeviceItemState(device);
-//        notifyDataSetChanged();
     }
 
     public void setFoundedToDBDevices(Device device) {
@@ -271,29 +265,12 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
         if (oldPosition >= 0) {
             Device exist = getItem(oldPosition);
 
-//            device = new Device(exist);
             exist.DeviceName = device.DeviceName;
             exist.IsSaved = true;
             exist.State = Device.STATE_ONLINE;
 
-//            if (discoveredDevicesCount > 1 && oldPosition < discoveredDevicesCount) {
-                // replace to new position
-//                list.remove(oldPosition);
-//                discoveredDevicesCount--;
-//                int newPosition = discoveredDevicesCount;
-//                // add to new position
-//                list.add(newPosition, device);
-//            }
-//            else
-//            discoveredDevicesCount--;
-
             // add to database devices
             if (!dbDevices.contains(exist)) dbDevices.add(exist);
-            /*if (newDevices.contains(exist)) */
-//            newDevices.remove(exist);
-
-//            updateWithoutNotify(oldPosition, device);
-//            notifyDataSetChanged();
             update(oldPosition, exist);
         }
     }
@@ -301,11 +278,7 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
     private void addFoundedLikeNewDevice(Device device) {
         device.IsSaved = false;
         device.State = Device.STATE_ONLINE;
-//        discoveredDevicesCount++;
         list.add(device);
-
-//        newDevices.add(device);
-
         notifyDataSetChanged();
     }
 
@@ -340,7 +313,6 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
     }
 
     public void delete(Device device) {
-//        int index = getPosition(device);
         list.remove(device);
 
         dbDevices.remove(device);
@@ -352,7 +324,4 @@ public class DevicesArrayAdapter extends BaseAdapter implements ListAdapter {//e
         return list;
     }
 
-//    public int getDiscoveredCount() {
-//        return discoveredDevicesCount;
-//    }
 }

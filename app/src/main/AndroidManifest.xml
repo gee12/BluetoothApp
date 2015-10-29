@@ -30,7 +30,18 @@
         </activity>
         <activity
             android:name="com.icon.activities.ProgrDeviceActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/action_progr_device" >
+        </activity>
+        <activity
+            android:name="com.icon.activities.ProgrDevicesGroupActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/action_progr_devices_group" >
+        </activity>
+        <activity
+            android:name="com.icon.activities.ProgrDevicesGroupActivity2"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/action_progr_devices_group2" >
         </activity>
         <activity
             android:name="com.icon.activities.EditDeviceActivity"
@@ -55,7 +66,7 @@
             android:name="com.icon.activities.LogActivity"
             android:label="@string/action_logs" >
             <intent-filter>
-                <action android:name="com.icon.agnks.LogActivity" />
+                <action android:name="LogActivity" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

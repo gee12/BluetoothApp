@@ -8,14 +8,13 @@ import com.icon.agnks.Bluetooth;
 import com.icon.agnks.Logger;
 import com.icon.utils.Utils;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 
 public class ClientThread extends Thread {
 
     public interface ClientListener {
 //        Communicator createCommunicationThread(BluetoothSocket socket);
-        void connectionCompleted(BluetoothDevice remoteDevice, boolean isConnected);
+        void onConnectionCompleted(BluetoothDevice remoteDevice, boolean isConnected);
     }
 
     private final BluetoothSocket socket;
@@ -43,7 +42,7 @@ public class ClientThread extends Thread {
         if (socket != null) {
             BluetoothDevice device = socket.getRemoteDevice();
             if (device != null)
-                Logger.add("ClientThread: Create BluetoothSocket. Socket RemoteDevice info: " + Utils.getDeviceInfo(device), Log.DEBUG);
+                Logger.add("ClientThread: Create BluetoothSocket. Socket RemoteDevice info: " + Utils.getDeviceInfo(device), Log.INFO);
         }
     }
 
@@ -55,76 +54,45 @@ public class ClientThread extends Thread {
         this.communicationListener = listener;
     }
 
-//    public synchronized Communicator getCommunicator() {
-//        return communicator;
-//    }
+    public synchronized Communicator getCommunicator() {
+        return communicator;
+    }
 
+    @Override
     public void run() {
         if (socket == null) return;
 
-//        bluetoothAdapter.cancelDiscovery();
         Bluetooth.cancelDiscovery();
         try {
-            Logger.add("ClientThread: Before connecting to BluetoothSocket", Log.DEBUG);
+            Logger.add("ClientThread: Before connecting to BluetoothSocket", Log.INFO);
             socket.connect();
 
-            Logger.add("ClientThread: Connected to BluetoothSocket", Log.DEBUG);
+            Logger.add("ClientThread: Connected to BluetoothSocket", Log.INFO);
             synchronized (this) {
-//                communicator = clientListener.createCommunicationThread(socket);
                 communicator = new CommunicationThread(socket, communicationListener);
             }
-            Logger.add("ClientThread: Communicator created", Log.DEBUG);
-
+            Logger.add("ClientThread: CommunicationThread created", Log.INFO);
             isConnected = true;
 
         } catch (Exception connectException) {
             Logger.add("ClientThread: Run exception. INFO: " + connectException.getLocalizedMessage(), connectException);
 
-            closeSocket();
+            cancel();
         } finally {
-            clientListener.connectionCompleted(socket.getRemoteDevice(), isConnected);
+            clientListener.onConnectionCompleted(socket.getRemoteDevice(), isConnected);
         }
-    }
-
-    /**
-     *
-     */
-    public void startResponceListening() {
-        if (communicator == null) return;
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Logger.add("ClientThread: communicator.startCommunication()", Log.DEBUG);
-                communicator.startCommunication();
-            }
-        }).start();
-    }
-
-    /**
-     *
-     * @param bytes
-     */
-    public void sendBytes(byte[] bytes) {
-        if (communicator == null) return;
-
-        communicator.write(bytes);
     }
 
     public boolean isConnected() {
         return isConnected;
     }
 
-    public void cancel() {
-        if (communicator != null) communicator.stopCommunication();
-//        if (socket != null) closeSocket();
+    public BluetoothDevice getBluetoothDevice() {
+        if (socket != null) return socket.getRemoteDevice();
+        return null;
     }
 
-    private void closeSocket() {
-        try {
-            socket.close();
-        } catch (IOException ex) {
-            Logger.add("ClientThread: Close BluetoothSocket", ex);
-        }
+    public void cancel() {
+        if (communicator != null) communicator.stopCommunication();
     }
 }

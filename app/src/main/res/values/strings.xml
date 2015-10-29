@@ -12,6 +12,8 @@
     <string name="str_prompt_enter_message">Текст сообщения:</string>
     <string name="str_data">(разделитель чисел - пробел):</string>
     <string name="str_setup_connect">Установить соединение</string>
+    <string name="str_stop_check_connect">Остановить проверку</string>
+    <string name="str_check_connect">Проверить соединение</string>
     <string name="str_close_connect">Закрыть соединение</string>
     <string name="str_send_message">Отправить сообщение</string>
     <string name="str_send_command">Отправить</string>
@@ -26,6 +28,8 @@
     <string name="action_devices_manage">Управление устройствами</string>
     <string name="action_manage_devices">Управление устройствами</string>
     <string name="action_progr_device">Программирование устройства</string>
+    <string name="action_progr_devices_group">Программирование группы устройств</string>
+    <string name="action_progr_devices_group2">Прогр. группы (без проверки соед.)</string>
     <string name="action_edit_device">Редактирование устройства</string>
     <string name="action_settings">Настройки</string>
     <string name="action_about">О программе</string>
@@ -65,6 +69,6 @@
     <string name="pref_key_screen_log">pref_key_screen_log</string>
     <string name="pref_key_screen_access">pref_key_screen_access</string>
     <string name="pref_key_is_need_bt_auto_enable">pref_key_is_need_bt_auto_enable</string>
-    <string name="pref_key_answer_max_delay">pref_key_answer_max_delay</string>
+    <string name="pref_key_max_timeout">pref_key_max_timeout</string>
 
 </resources>

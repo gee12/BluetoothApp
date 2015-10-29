@@ -25,15 +25,15 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onStop() {
 
         // выключаем Bluetooth, если включали автоматически
         if (Bluetooth.IsAutoEnable) {
             Bluetooth.disable();
         }
         //
-        Bluetooth.cancelDeviceCommunication();
+        Bluetooth.cancelCurrentDeviceCommunication();
 
-        super.onDestroy();
+        super.onStop();
     }
 }
